@@ -5,7 +5,8 @@
 #import <React/RCTBridgeModule.h>
 #endif
 
-@interface RNUmsdk : NSObject <RCTBridgeModule>
+@interface RNUMSdk : NSObject <RCTBridgeModule>
 
++ (void)initWithAppkey:(NSString* )umAppKey;
 @end
   

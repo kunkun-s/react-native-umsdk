@@ -12,6 +12,7 @@
   ],
   "author": "",
   "license": "",
+  "homepage": "https://github.com/kunkun-s/react-native-umsdk.git",
   "peerDependencies": {
     "react-native": "^0.41.2",
     "react-native-windows": "0.41.0-rc.1"
