@@ -155,7 +155,12 @@ RCT_REMAP_METHOD(shareToPlatform, shareToPlatform:(NSInteger )platformType share
     
   } else {
     //默认为纯文字分享
-    messageObject.text = [params objectForKey:@"title"] ? [params objectForKey:@"title"] : @"分享默认文案";
+      if (platformType == 4) {
+          //qq 不支持纯文本分享
+          messageObject.shareObject = [self shareWebObject:params];
+      } else {
+          messageObject.text = [params objectForKey:@"title"] ? [params objectForKey:@"title"] : @"分享给大家！";
+      }
   }
   
   //调用分享接口

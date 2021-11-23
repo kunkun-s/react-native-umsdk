@@ -108,7 +108,7 @@ public class RNUMShare extends ReactContextBaseJavaModule {
      * @param ma
      */
     private void shareImage(ReadableMap newParams, SHARE_MEDIA share_media, Activity ma){
-        UMImage image = new UMImage(ma,newParams.getString("poster"));//网络图
+        UMImage image = new UMImage(ma, newParams.getString("poster"));//网络图
         UMImage thumb =  new UMImage(ma, newParams.getString("poster"));//缩略图
         thumb.compressStyle = UMImage.CompressStyle.SCALE;
         image.setThumb(thumb);
@@ -159,18 +159,24 @@ public class RNUMShare extends ReactContextBaseJavaModule {
      * @param ma
      */
     private void shareWXMiniProgram(ReadableMap newParams, SHARE_MEDIA share_media, Activity ma){
-        UMWeb web = new UMWeb(newParams.getString("t_url"));
-        web.setTitle(newParams.getString("title"));
-        web.setDescription(newParams.getString("content"));
-        if (newParams.hasKey("img_path")){
-            web.setThumb(getImage(newParams.getString("img_path")));
-        }else {
-            web.setThumb(new UMImage(ma, R.drawable.share));
-        }
+
+        //分享微信小程序 t_url兼容低版本的网页链接
+        UMMin umMin = new UMMin(newParams.getString("t_url"));
+        // 小程序消息封面图片
+        umMin.setThumb(getImage(newParams.getString("img_path")));
+        // 小程序消息title
+        umMin.setTitle(newParams.getString("title"));
+        // 小程序消息描述 "pages/page10007/xxxxxx"
+        umMin.setDescription(newParams.getString("content"));
+        //小程序页面路由路径
+        umMin.setPath(newParams.getString("path"));
+        // 小程序原始id,在微信平台查询
+        umMin.setUserName(newParams.getString("userName"));
         new ShareAction(ma)
-                .withMedia(web)
+                .withMedia(umMin)
                 .setPlatform(share_media)
                 .share();
+
     }
 
     /**

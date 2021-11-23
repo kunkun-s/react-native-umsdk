@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   # 排除那些文件 如果集成了微信支付，则WechatSDK的内容会与微信官方的OpenSdk重复。
   # s.exclude_files = "libs/**/WeChat/WechatSDK/*"
   # 系统的依赖库
-  s.framework = "CoreTelephony","SystemConfiguration","WebKit"
+  s.framework = "CoreTelephony","SystemConfiguration","WebKit","UserNotifications"
   # 私有framework
   s.vendored_frameworks = 'libs/**/*.framework'
   # 系统的.a
@@ -30,8 +30,10 @@ Pod::Spec.new do |s|
   s.resources = ['libs/**/*.bundle']
   # 资源文件 将资源文件打包成bundle
   s.resource_bundles = {'RNUMSDK' => ['images/*'] }
-
+  # 依赖其他的pod库
   s.dependency "React"
+  # UM错误分析升级为独立SDK，看crash数据请务必集成，可选
+  s.dependency "UMAPM"
   #s.dependency "others"
 
 end
