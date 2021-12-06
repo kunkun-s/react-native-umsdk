@@ -36,4 +36,12 @@ public class RNUMPushModule extends ReactContextBaseJavaModule {
         //Android push 没有保存通知消息的实现
         return;
     }
+    @ReactMethod
+    public void addListener(String eventName) {
+        // Set up any upstream listeners or background tasks as necessary
+    }
+    @ReactMethod
+    public void removeListeners(Integer count) {
+        // Remove upstream listeners, stop unnecessary background tasks
+    }
 }

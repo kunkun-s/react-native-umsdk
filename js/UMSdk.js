@@ -5,15 +5,23 @@ let umsdk = null
 function getMyReactBridgeManager() {
     
     if (!umsdk) {
-        umsdk = NativeModules.MyReactBridgeManager
+        umsdk = NativeModules.RNUMSdkBridge
     }
     return umsdk;
 }
 /**
- * 正式注册umsdk，必须在用户协议同意之后
+ * 正式注册umsdk，必须在用户协议同意之后 暂时仅Android
  */
 export function initUMSDK() {
-    getMyReactBridgeManager()?.initUMSDK?.();
+    NativeModules.MyReactBridgeManager?.initUMSDK?.();
+}
+/**
+ * 微信第三方登陆 wx qq
+ * @param {} platformType  1微信聊天 2微信朋友圈 4qq 默认1
+ * @param {*} callback  data,result
+ */
+export function auth( platformType, callback) {
+    NativeModules.RNUMShare.auth(platformType, callback);
 }
 /**
  * 用户账户统计，配合onProfileSignOff

@@ -7,8 +7,22 @@
 
 #import "RNUMPush.h"
 
+#define NONIFICATION_CENTER @"userNotificationCenter"
 
 @implementation RNUMPush
+
+
++(instancetype)shareRNUMPush{
+  
+  static RNUMPush *push = nil;
+
+  static dispatch_once_t onceToken;
+
+  dispatch_once(&onceToken, ^{
+      push = [[RNUMPush alloc]init];
+  });
+  return push;
+}
 
 + (void)initUpus:(NSDictionary * __nullable)launchOptions delegate:(id <UNUserNotificationCenterDelegate> )delegate{
     // Push功能配置
@@ -69,8 +83,7 @@
     //必须加这句代码
     [UMessage didReceiveRemoteNotification:userInfo];
     
-//    [self pushDic:userInfo notificationName:NONIFICATION_TYPE];
-    
+    [RNUMPush sendEventWithName:NONIFICATION_CENTER body:userInfo];
   }else{
     //应用处于前台时的本地推送接受
   }
@@ -87,7 +100,8 @@
     //将通知消息暂存
     [[NSUserDefaults standardUserDefaults] setObject:userInfo forKey:@"RN_UM_NONIFICATION_BACK"];
     [[NSUserDefaults standardUserDefaults] synchronize];
-//    [self pushDic:userInfo notificationName:NONIFICATION_TYPE];
+
+      [RNUMPush sendEventWithName:NONIFICATION_CENTER body:userInfo];
     
   }else{
     //应用处于后台时的本地推送接受
@@ -98,8 +112,7 @@
     [UMessage setAutoAlert:NO];
     if([[[UIDevice currentDevice] systemVersion]intValue] < 10){
       [UMessage didReceiveRemoteNotification:userInfo];
-//      [self pushDic:userInfo notificationName:NONIFICATION_TYPE];
-
+        [RNUMPush sendEventWithName:NONIFICATION_CENTER body:userInfo];
       completionHandler(UIBackgroundFetchResultNewData);
     }
     //过滤掉Push的撤销功能，因为PushSDK内部已经调用的completionHandler(UIBackgroundFetchResultNewData)，
@@ -111,6 +124,15 @@
 }
 
 RCT_EXPORT_MODULE(RNUMPush)
+- (NSArray<NSString *> *)supportedEvents
+{
+  return @[ NONIFICATION_CENTER ];
+}
++ (void)sendEventWithName:(NSString *)name body:(id)body{
+    NSDictionary * parmas = [self creactData:body];
+    [[RNUMPush shareRNUMPush] sendEventWithName:name body:parmas];
+
+}
 RCT_REMAP_METHOD(getNonification, getNonification:(RCTResponseSenderBlock)callback){
   NSUserDefaults * userdf = [NSUserDefaults standardUserDefaults];
   if ([userdf objectForKey:@"RN_UM_NONIFICATION_BACK"]) {

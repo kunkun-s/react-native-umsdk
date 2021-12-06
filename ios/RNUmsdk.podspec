@@ -15,9 +15,16 @@ Pod::Spec.new do |s|
   s.source_files  = "*.{h,m}","libs/share/**/SocialLibraries/*/UMSocial*Handler.h","class/**/*.{h,m}","libs/share/**/SocialLibraries/WeChat/WechatSDK/*.h"
 
   s.requires_arc = true
-
-  # 排除那些文件 如果集成了微信支付，则WechatSDK的内容会与微信官方的OpenSdk重复。
-  # s.exclude_files = "libs/**/WeChat/WechatSDK/*"
+=begin
+  推荐使用s.dependency自动引用依赖，避免手动引用导致重复。
+  如果手动引用了OpenSdk，会导致与umsdk冲突，
+    解决方式1.所有OpenSdk都用自动引用。
+    方式2：在Podfile中pre_install方法内删除UMSDK的WechatSDK。
+  同时集成Alipay也会导致UTDID重复引用。
+    解决：1.将UMSDK -> thirdparties -> UTDID 和 pod 'UMCSecurityPlugins' 删除
+=end
+  # 或略WechatSDK 采用自动依赖，工程预留WechatSDK 是防止pod不能下载成功，做备份。
+  s.exclude_files = "libs/**/WeChat/WechatSDK/*",
   # 系统的依赖库
   s.framework = "CoreTelephony","SystemConfiguration","WebKit","UserNotifications"
   # 私有framework
@@ -33,9 +40,9 @@ Pod::Spec.new do |s|
   # 依赖其他的pod库
   s.dependency "React"
   # UM错误分析升级为独立SDK，看crash数据请务必集成，可选
-  s.dependency "UMAPM"
+  s.dependency "UMAPM",'~> 1.5.3'
   #s.dependency "others"
-
+  s.dependency 'WechatOpenSDK',"~> 1.8.7.1"
 end
 
   

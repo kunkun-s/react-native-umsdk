@@ -1,17 +1,8 @@
 import { useEffect } from 'react'
 import {NativeEventEmitter, NativeModules} from 'react-native'
 
-let DDNativeEventEmitter = null;
 let RNUMPush = null
-function getNEE(params) {
-    if (!DDNativeEventEmitter) {
-        
-        DDNativeEventEmitter =  new NativeEventEmitter(NativeModules.MyReactBridgeManager);
 
-        // DDNativeEventEmitter =  new NativeEventEmitter();
-    }
-    return DDNativeEventEmitter
-}
 function getRNUMPush() {
     if (RNUMPush) {
         RNUMPush = NativeModules.RNUMPush;
@@ -23,12 +14,8 @@ function getRNUMPush() {
  * 需要在合适的时机使用  listeener?.remove?.()
  */
 export const userNotificationCenter = (callback)=>{
-    const listeener = getNEE()?.addListener?.('userNotificationCenter', callback);
-    // useEffect(()=>{
-    //     return ()=>{
-    //         listeener?.remove?.()
-    //     }
-    // },[listeener])
+    const listeener = getRNUMPush()?.addListener?.('userNotificationCenter', callback);
+   
     return listeener
 }
 /**
