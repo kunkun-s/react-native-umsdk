@@ -1,5 +1,5 @@
 
-#import "RNUMSdk.h"
+#import "RNUmsdk.h"
 #import <UMCommon/UMCommon.h>
 #import <UMCommon/MobClick.h>
 @implementation RNUMSdk
