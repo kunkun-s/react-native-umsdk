@@ -4,7 +4,7 @@ import {NativeEventEmitter, NativeModules} from 'react-native'
 let RNUMPush = null
 
 function getRNUMPush() {
-    if (RNUMPush) {
+    if (!RNUMPush) {
         RNUMPush = NativeModules.RNUMPush;
     }
     return RNUMPush;
