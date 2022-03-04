@@ -33,7 +33,7 @@ export const getNonification = (callback)=>{
  * @param {*} callback 
  */
 export const getDeviceToken = (callback)=>{
-    getRNUMPush()?.getNonification?.((deviceToken)=>{
+    getRNUMPush()?.getDeviceToken?.((deviceToken)=>{
         callback?.(deviceToken)
     })
 }
