@@ -7,6 +7,7 @@ function getRNUMPush() {
     if (!RNUMPush) {
         RNUMPush = NativeModules.RNUMPush;
     }
+    console.log(NativeModules.RNUMPush)
     return RNUMPush;
 }
 /**
@@ -14,7 +15,7 @@ function getRNUMPush() {
  * 需要在合适的时机使用  listeener?.remove?.()
  */
 export const userNotificationCenter = (callback)=>{
-    const listeener = getRNUMPush()?.addListener?.('userNotificationCenter', callback);
+    const listeener = new NativeEventEmitter(getRNUMPush())?.addListener?.('userNotificationCenter', callback);
    
     return listeener
 }
@@ -33,6 +34,7 @@ export const getNonification = (callback)=>{
  * @param {*} callback 
  */
 export const getDeviceToken = (callback)=>{
+    console.log("getDeviceToken")
     getRNUMPush()?.getDeviceToken?.((deviceToken)=>{
         callback?.(deviceToken)
     })

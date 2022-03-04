@@ -19,7 +19,9 @@
 #import <React/RCTEventEmitter.h>
 
 @interface RNUMPush : RCTEventEmitter <RCTBridgeModule>
-+(instancetype)shareRNUMPush;
+
+@property (nonatomic,assign) bool hasListeners;
++(RNUMPush * _Nullable )shareRNUMPush;
 + (void)initUpus:(NSDictionary * __nullable)launchOptions delegate:(id <UNUserNotificationCenterDelegate> _Nullable )delegate;
 + (void)userNotificationCenter:(UNUserNotificationCenter *_Nonnull)center willPresentNotification:(UNNotification *_Nullable)notification withCompletionHandler:(void (^_Nonnull)(UNNotificationPresentationOptions))completionHandler;
 + (void)userNotificationCenter:(UNUserNotificationCenter*_Nonnull)center didReceiveNotificationResponse:(UNNotificationResponse*_Nullable)response withCompletionHandler:(void(^_Nonnull)(void))completionHandler;

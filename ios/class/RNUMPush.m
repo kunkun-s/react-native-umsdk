@@ -11,8 +11,7 @@
 
 @implementation RNUMPush
 
-
-+(instancetype)shareRNUMPush{
++(RNUMPush *)shareRNUMPush{
   
   static RNUMPush *push = nil;
 
@@ -20,6 +19,7 @@
 
   dispatch_once(&onceToken, ^{
       push = [[RNUMPush alloc]init];
+      push.hasListeners = NO;
   });
   return push;
 }
@@ -82,7 +82,7 @@
     [UMessage setAutoAlert:NO];
     //必须加这句代码
     [UMessage didReceiveRemoteNotification:userInfo];
-    
+      
     [RNUMPush sendEventWithName:NONIFICATION_CENTER body:userInfo];
   }else{
     //应用处于前台时的本地推送接受
@@ -111,8 +111,9 @@
 + (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(nonnull void (^)(UIBackgroundFetchResult))completionHandler{
     [UMessage setAutoAlert:NO];
     if([[[UIDevice currentDevice] systemVersion]intValue] < 10){
-      [UMessage didReceiveRemoteNotification:userInfo];
+        [UMessage didReceiveRemoteNotification:userInfo];
         [RNUMPush sendEventWithName:NONIFICATION_CENTER body:userInfo];
+        
       completionHandler(UIBackgroundFetchResultNewData);
     }
     //过滤掉Push的撤销功能，因为PushSDK内部已经调用的completionHandler(UIBackgroundFetchResultNewData)，
@@ -129,9 +130,23 @@ RCT_EXPORT_MODULE(RNUMPush)
   return @[ NONIFICATION_CENTER ];
 }
 + (void)sendEventWithName:(NSString *)name body:(id)body{
-    NSDictionary * parmas = [self creactData:body];
-    [[RNUMPush shareRNUMPush] sendEventWithName:name body:parmas];
+    
+    if ([RNUMPush shareRNUMPush].hasListeners) {
+        NSDictionary * parmas = [RNUMPush creactData:body];
+        [[RNUMPush shareRNUMPush] sendEventWithName:name body:parmas];
+    }
 
+}
+// 在添加第一个监听函数时触发
+-(void)startObserving {
+    [RNUMPush shareRNUMPush].hasListeners = YES;
+    // Set up any upstream listeners or background tasks as necessary
+}
+
+// Will be called when this module's last listener is removed, or on dealloc.
+-(void)stopObserving {
+    [RNUMPush shareRNUMPush].hasListeners = NO;
+    // Remove upstream listeners, stop unnecessary background tasks
 }
 RCT_REMAP_METHOD(getNonification, getNonification:(RCTResponseSenderBlock)callback){
   NSUserDefaults * userdf = [NSUserDefaults standardUserDefaults];
@@ -146,7 +161,6 @@ RCT_REMAP_METHOD(getDeviceToken, getDeviceToken:(RCTResponseSenderBlock)callback
   NSString *deviceToken = [[NSUserDefaults standardUserDefaults] objectForKey:@"deviceToken"];
   deviceToken =  deviceToken?deviceToken:@"";
   callback(@[deviceToken]);
-  
 }
 /**
  暂存APP在后台时，用户点击的推送消息
