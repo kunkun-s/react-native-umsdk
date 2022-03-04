@@ -132,6 +132,7 @@ RCT_EXPORT_MODULE(RNUMPush)
 + (void)sendEventWithName:(NSString *)name body:(id)body{
     
     if ([RNUMPush shareRNUMPush].hasListeners) {
+        
         NSDictionary * parmas = [RNUMPush creactData:body];
         [[RNUMPush shareRNUMPush] sendEventWithName:name body:parmas];
     }
