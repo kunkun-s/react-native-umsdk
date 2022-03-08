@@ -7,7 +7,6 @@ function getRNUMPush() {
     if (!RNUMPush) {
         RNUMPush = NativeModules.RNUMPush;
     }
-    console.log(NativeModules.RNUMPush)
     return RNUMPush;
 }
 /**
@@ -34,7 +33,7 @@ export const getNonification = (callback)=>{
  * @param {*} callback 
  */
 export const getDeviceToken = (callback)=>{
-    console.log("getDeviceToken")
+
     getRNUMPush()?.getDeviceToken?.((deviceToken)=>{
         callback?.(deviceToken)
     })
