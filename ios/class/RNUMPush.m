@@ -11,17 +11,31 @@
 
 @implementation RNUMPush
 
+static RNUMPush * push = nil;
+
 +(RNUMPush *)shareRNUMPush{
-  
-  static RNUMPush *push = nil;
-
-  static dispatch_once_t onceToken;
-
-  dispatch_once(&onceToken, ^{
-      push = [[RNUMPush alloc]init];
-      push.hasListeners = NO;
-  });
+    if (!push) {
+        push = [[RNUMPush alloc]init];
+    }
   return push;
+}
+//将init 重写改为单利，因为rn自动将RCTBridgeModule 模块加入到bridgeManrger管理，因此我们再次创建一个shareRNUMPush获取的与bridgeManrger中的并非同一个，因此无法使用RCTEventEmitter
+/**
+ 将init 重写改为单利
+ 因为rn自动将RCTBridgeModule 模块加入到bridgeManrger管理，这个操作会init一个新的RNUMPush
+ 因此我们再次使用shareRNUMPush获取的RNUMPush，要与bridgeManrger中的为同一个，才可以正确使用RCTEventEmitter的sendEventWithName:<#(NSString *)#> body:<#(id)#>
+ */
+- (instancetype)init
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        push = [super init];
+        push.hasListeners = NO;
+    });
+    if (push) {
+        self = push;
+    }
+    return self;
 }
 
 + (void)initUpus:(NSDictionary * __nullable)launchOptions delegate:(id <UNUserNotificationCenterDelegate> )delegate{
@@ -129,6 +143,9 @@ RCT_EXPORT_MODULE(RNUMPush)
 {
   return @[ NONIFICATION_CENTER ];
 }
+- (void)reactMessage:(id)body {
+    [self sendEventWithName:NONIFICATION_CENTER body:body];
+}
 + (void)sendEventWithName:(NSString *)name body:(id)body{
     
     if ([RNUMPush shareRNUMPush].hasListeners) {
@@ -142,6 +159,7 @@ RCT_EXPORT_MODULE(RNUMPush)
 -(void)startObserving {
     [RNUMPush shareRNUMPush].hasListeners = YES;
     // Set up any upstream listeners or background tasks as necessary
+    [self sendEventWithName:NONIFICATION_CENTER body:@{@"test":@"测试"}];
 }
 
 // Will be called when this module's last listener is removed, or on dealloc.
