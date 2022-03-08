@@ -159,7 +159,6 @@ RCT_EXPORT_MODULE(RNUMPush)
 -(void)startObserving {
     [RNUMPush shareRNUMPush].hasListeners = YES;
     // Set up any upstream listeners or background tasks as necessary
-    [self sendEventWithName:NONIFICATION_CENTER body:@{@"test":@"测试"}];
 }
 
 // Will be called when this module's last listener is removed, or on dealloc.
@@ -216,15 +215,19 @@ RCT_REMAP_METHOD(getDeviceToken, getDeviceToken:(RCTResponseSenderBlock)callback
         
         [parmas setValue:[body objectForKey:@"text"] forKey:@"text"];
         if ([dic objectForKey:@"extra"]) {
-          if ([[dic objectForKey:@"extra"] objectForKey:@"title"]) {
-            [parmas setValue:[[dic objectForKey:@"extra"] objectForKey:@"title"] forKey:@"title"];
-          }
-          if ([[dic objectForKey:@"extra"] objectForKey:@"text"]) {
-            [parmas setValue:[[dic objectForKey:@"extra"] objectForKey:@"text"] forKey:@"text"];
-          }
-          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:[dic objectForKey:@"extra"] options:NSJSONWritingPrettyPrinted error:NULL];
-          
-          [parmas setValue:[[NSString alloc]initWithData:jsonData encoding:NSUTF8StringEncoding] forKey:@"extra"];
+            if ([[dic objectForKey:@"extra"] objectForKey:@"title"]) {
+                [parmas setValue:[[dic objectForKey:@"extra"] objectForKey:@"title"] forKey:@"title"];
+            }
+            //两个取其一
+            if ([[dic objectForKey:@"extra"] objectForKey:@"content"]) {
+                [parmas setValue:[[dic objectForKey:@"extra"] objectForKey:@"content"] forKey:@"text"];
+            }else if ([[dic objectForKey:@"extra"] objectForKey:@"text"]) {
+                [parmas setValue:[[dic objectForKey:@"extra"] objectForKey:@"text"] forKey:@"text"];
+            }
+           
+            NSData *jsonData = [NSJSONSerialization dataWithJSONObject:[dic objectForKey:@"extra"] options:NSJSONWritingPrettyPrinted error:NULL];
+
+            [parmas setValue:[[NSString alloc]initWithData:jsonData encoding:NSUTF8StringEncoding] forKey:@"extra"];
         }
     }
   

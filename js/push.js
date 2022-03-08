@@ -14,7 +14,8 @@ function getRNUMPush() {
  * 需要在合适的时机使用  listeener?.remove?.()
  */
 export const userNotificationCenter = (callback)=>{
-    const listeener = new NativeEventEmitter(getRNUMPush())?.addListener?.('userNotificationCenter', callback);
+   //Platform.OS == "ios" ? getRNUMPush() :  NativeModules.MyReactBridgeManager
+    const listeener = new NativeEventEmitter( getRNUMPush())?.addListener?.('userNotificationCenter', callback);
    
     return listeener
 }
