@@ -180,6 +180,9 @@ RCT_REMAP_METHOD(getDeviceToken, getDeviceToken:(RCTResponseSenderBlock)callback
   deviceToken =  deviceToken?deviceToken:@"";
   callback(@[deviceToken]);
 }
++ (BOOL)requiresMainQueueSetup {
+  return YES;
+}
 /**
  暂存APP在后台时，用户点击的推送消息
  */
