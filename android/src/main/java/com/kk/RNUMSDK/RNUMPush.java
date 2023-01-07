@@ -1,7 +1,13 @@
 package com.kk.RNUMSDK;
 
+import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -12,10 +18,12 @@ import com.umeng.message.PushAgent;
 import com.umeng.message.UTrack;
 import com.umeng.message.UmengMessageHandler;
 import com.umeng.message.UmengNotificationClickHandler;
+import com.umeng.message.common.UPushNotificationChannel;
 import com.umeng.message.entity.UMessage;
 
 public class RNUMPush {
     private Handler handler;
+
     public void initUpush(final Context context, final UMPUSHCallback umcallback) {
 
         //---------------
@@ -29,19 +37,25 @@ public class RNUMPush {
         //获取的是主程序的包名而非是，当前模块的包名
         String applictionID = context.getApplicationInfo().packageName;
 //        Log.i("xxxxxx",applictionID);
-        //为push 指定applictionID，如果文件结构和包名不一致时必须设置，
+        //为push 指定packageName，如果文件结构和包名不一致时必须设置，用于加载那个资源包的res下文件，可以是gradle依赖的三方包
         mPushAgent.setResourcePackageName(applictionID);
 
         UmengMessageHandler messageHandler = new UmengMessageHandler() {
             /**
              * 自定义通知栏样式的回调方法
              */
-//      @Override
-//      public Notification getNotification(Context context, UMessage msg) {
-//        System.out.println("新消息消息getNotification");
-//        sendDDUMessageHandler(msg);
-//        return super.getNotification(context, msg);
-//      }
+            @Override
+                public Notification getNotification(Context context, UMessage msg) {
+                System.out.println("新消息消息getNotification"+msg.extra.get("audioStyle"));
+//
+                if (umcallback != null) {
+                    Notification notf = umcallback.getNotification(context, msg);;
+                    if (notf != null){
+                        return  notf;
+                    }
+                }
+                return super.getNotification(context, msg);
+            }
             /**
              * 通知的回调方法（通知送达时会回调）
              */
@@ -84,6 +98,8 @@ public class RNUMPush {
         UmengNotificationClickHandler notificationClickHandler = new UmengNotificationClickHandler() {
             @Override
             public void dealWithCustomAction(Context context, UMessage msg) {
+                //统计点击率
+                UTrack.getInstance(context).trackMsgClick(msg);
             }
         };
         //使用自定义的NotificationHandler，来结合友盟统计处理消息通知，参考http://bbs.umeng.com/thread-11112-1-1.html
@@ -105,6 +121,21 @@ public class RNUMPush {
             public void onFailure(String s, String s1) {
             }
         });
+        // 推送权限检测
+        mPushAgent.setPushCheck(true);
+        // 设置免打扰时间24小时制（开始小时，开始分，结束小时，结束分）
+        // 例如：晚上23:00 - 次日5:00 免打扰
+        // PushAgent.getInstance(context).setNoDisturbMode(23, 0, 5, 0);
+        mPushAgent.setNoDisturbMode(0, 0, 0, 0);
+        /**
+         * 自定义通知图标
+         * 将图标防止在指定的资源包内（若 资源包 和 applicationId不一致，则要设置setResourcePackageName(实际资源包名)）），
+         * 状态栏小图标：res/drawable/umeng_push_notification_default_small_icon.png
+         * 通知栏大图标：res/drawable/umeng_push_notification_default_large_icon.png
+         * */
+        //允许震动
+        mPushAgent.setNotificationPlayVibrate(MsgConstant.NOTIFICATION_PLAY_SDK_ENABLE);
+        mPushAgent.setNotificationPlaySound(MsgConstant.NOTIFICATION_PLAY_SERVER);
 
         //各主要厂商推送实现
         //小米通道
