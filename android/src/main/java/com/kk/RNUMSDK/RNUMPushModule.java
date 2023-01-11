@@ -21,7 +21,7 @@ public class RNUMPushModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getDeviceToken(final boolean platform, final Callback successCallback) {
+    public void getDeviceToken( final Callback successCallback) {
         SharedPreferences userData =  reactContext.getSharedPreferences("userDataRN", Context.MODE_PRIVATE);
         String  deviceToken = "";
         if (userData != null){
