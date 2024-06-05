@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name         = "RNUmsdk"
-  s.version      = "1.0.3"
+  s.version      = "1.0.4"
   s.summary      = "RNUmsdk"
   s.description  = <<-DESC
                   RNUmsdk
@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.author             = { "author" => "author@domain.cn" }
   s.platform     = :ios, "7.0"
   s.source       = { :git => "https://github.com/author/RNUmsdk.git", :tag => "master" }
-  s.source_files  = "*.{h,m}","libs/share/**/SocialLibraries/*/UMSocial*Handler.h","class/**/*.{h,m}","libs/share/**/SocialLibraries/WeChat/WechatSDK/*.h"
+  s.source_files  = "ios/*.{h,m}","ios/libs/share/**/SocialLibraries/*/UMSocial*Handler.h","ios/class/**/*.{h,m}","ios/libs/share/**/SocialLibraries/WeChat/WechatSDK/*.h"
 
   s.requires_arc = true
 =begin
@@ -24,19 +24,19 @@ Pod::Spec.new do |s|
     解决：1.将UMSDK -> thirdparties -> UTDID 和 pod 'UMCSecurityPlugins' 删除
 =end
   # 或略WechatSDK 采用自动依赖，工程预留WechatSDK 是防止pod不能下载成功，做备份。
-  s.exclude_files = "libs/**/WeChat/WechatSDK/*",
+  s.exclude_files = "ios/libs/**/WeChat/WechatSDK/*",
   # 系统的依赖库
   s.framework = "CoreTelephony","SystemConfiguration","WebKit","UserNotifications"
   # 私有framework
-  s.vendored_frameworks = 'libs/**/*.framework'
+  s.vendored_frameworks = 'ios/libs/**/*.framework'
   # 系统的.a
   s.libraries = 'z','sqlite3','c++'
   # 私有的.a
-  s.vendored_libraries = 'libs/**/*.a'
+  s.vendored_libraries = 'ios/libs/**/*.a'
   # 引入资源文件
-  s.resources = ['libs/**/*.bundle']
+  s.resources = ['ios/libs/**/*.bundle']
   # 资源文件 将资源文件打包成bundle
-  s.resource_bundles = {'RNUMSDK' => ['images/*'] }
+  s.resource_bundles = {'RNUMSDK' => ['ios/images/*'] }
   # 依赖其他的pod库
   s.dependency "React"
   # UM错误分析升级为独立SDK，看crash数据请务必集成，可选
