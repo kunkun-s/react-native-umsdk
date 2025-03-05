@@ -55,13 +55,13 @@ dependencies {
 //    api 'com.tencent.tauth:qqopensdk:3.53.0'//QQ官方依赖库，必选 jcenter()
     implementation 'com.squareup.okhttp3:okhttp:3.12.12'//QQ SDK在3.53.0版本及以上时需要集成okhttp官方依赖库，必选
     api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.8.0'//微信官方依赖
-    api 'com.umeng.umsdk:common:9.6.8'  // 必选
-    api 'com.umeng.umsdk:asms:1.8.2'    // 必选
+    api 'com.umeng.umsdk:common:9.8.0'  // 必选
+    api 'com.umeng.umsdk:asms:1.8.6'    // 必选
     api 'com.umeng.umsdk:share-core:7.3.3' //友盟分享
     api 'com.umeng.umsdk:share-wx:7.3.3' //友盟分享微信
     api 'com.umeng.umsdk:share-qq:7.3.3' // qq
     //友盟Push依赖
-    api 'com.umeng.umsdk:push:6.6.3'
+    api 'com.umeng.umsdk:push:6.7.1'
     // 解决utdid 与alipay冲突
     // api('com.umeng.umsdk:push:6.4.5') {
     //     exclude group: 'com.umeng.umsdk', module: 'utdid'
