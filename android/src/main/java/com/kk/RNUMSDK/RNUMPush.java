@@ -39,7 +39,7 @@ public class RNUMPush {
 //        Log.i("xxxxxx",applictionID);
         //为push 指定packageName，如果文件结构和包名不一致时必须设置，用于加载那个资源包的res下文件，可以是gradle依赖的三方包
         mPushAgent.setResourcePackageName(applictionID);
-
+        mPushAgent.setBadgeNum(0);//清除角标
         UmengMessageHandler messageHandler = new UmengMessageHandler() {
             /**
              * 自定义通知栏样式的回调方法
