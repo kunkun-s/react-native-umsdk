@@ -7,6 +7,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+   "codegenConfig": {
+    "name": "NativeUMSdkModuleSpec",
+    "type": "modules",
+    "jsSrcsDir": "specs",
+    "android": {
+      "javaPackageName": "com.kk.rnumsdk"
+    }
+  },
   "keywords": [
     "react-native"
   ],

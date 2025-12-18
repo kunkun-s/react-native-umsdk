@@ -1,11 +1,10 @@
-import { useEffect } from 'react'
 import {NativeEventEmitter, NativeModules} from 'react-native'
-
+import RNUMPushArch from '../specs/NativeUMSdkModule'
 let RNUMPush = null
 
 function getRNUMPush() {
     if (!RNUMPush) {
-        RNUMPush = NativeModules.RNUMPush;
+        RNUMPush = RNUMPushArch||NativeModules.RNUMSdkBridge;
     }
     return RNUMPush;
 }
@@ -14,8 +13,8 @@ function getRNUMPush() {
  * 需要在合适的时机使用  listeener?.remove?.()
  */
 export const userNotificationCenter = (callback)=>{
-   //Platform.OS == "ios" ? getRNUMPush() :  NativeModules.MyReactBridgeManager
-    const listeener = new NativeEventEmitter( getRNUMPush())?.addListener?.('userNotificationCenter', callback);
+
+    const listeener = new NativeEventEmitter( NativeModules?.RNUMSdkBridge)?.addListener?.('userNotificationCenter', callback);
    
     return listeener
 }

@@ -1,12 +1,13 @@
 
 import { NativeModules } from 'react-native'
+import RNUMPushArch from '../specs/NativeUMSdkModule'
 
 let share = null
 
 function getShare() {
     
     if (!share) {
-        share = NativeModules.RNUMShare
+        share = RNUMPushArch||NativeModules.RNUMSdkBridge
     }
     return share;
 }
