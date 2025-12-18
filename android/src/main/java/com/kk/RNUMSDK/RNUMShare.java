@@ -1,40 +1,56 @@
-package com.kk.RNUMSDK;
+package com.kk.rnumsdk;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Intent;
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Switch;
+
+
+import androidx.core.content.ContextCompat;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.tencent.tauth.Tencent;
 import com.umeng.socialize.PlatformConfig;
 import com.umeng.socialize.ShareAction;
 import com.umeng.socialize.UMAuthListener;
 import com.umeng.socialize.UMShareAPI;
+import com.umeng.socialize.UMShareListener;
 import com.umeng.socialize.bean.SHARE_MEDIA;
 import com.umeng.socialize.common.ResContainer;
 import com.umeng.socialize.media.UMImage;
 import com.umeng.socialize.media.UMMin;
 import com.umeng.socialize.media.UMWeb;
 
+import java.io.File;
 import java.util.Map;
 
-public class RNUMShare extends ReactContextBaseJavaModule {
-    private static Handler mainHandler = new Handler(Looper.getMainLooper());
+public class RNUMShare {
+    public static ReactApplicationContext reactContext;
+    private static Handler mSDKHandler = null;
 
-
-    public RNUMShare(ReactApplicationContext reactContext) {
-        super(reactContext);
-//        this.reactContext = reactContext;
+    public RNUMShare(ReactApplicationContext nReactContext, KKAppResource AppResource) {
+        reactContext = nReactContext;
     }
+
+    private static void runOnMainThread(Runnable runnable) {
+        if (mSDKHandler == null){
+            mSDKHandler = new Handler(Looper.getMainLooper());
+        }
+        mSDKHandler.postDelayed(runnable, 0);
+    }
+
+
 
     /**
      * 配置分享平台
@@ -67,17 +83,21 @@ public class RNUMShare extends ReactContextBaseJavaModule {
      * @return
      */
     private UMImage getImage(String url){
+        Activity ma = reactContext.getCurrentActivity();
         if (TextUtils.isEmpty(url)){
             return null;
-        }else if(url.startsWith("http")){
-            return new UMImage(getCurrentActivity(),url);
-        }else if(url.startsWith("/")){
-            return new UMImage(getCurrentActivity(),url);
-        }else if(url.startsWith("res")){
-            return new UMImage(getCurrentActivity(), ResContainer.getResourceId(getCurrentActivity(),"drawable",url.replace("res/","")));
-        }else {
-            return new UMImage(getCurrentActivity(),url);
+        }else if (ma != null){
+            if(url.startsWith("http")){
+                return new UMImage(ma,url);
+            }else if(url.startsWith("/")){
+                return new UMImage(ma,url);
+            }else if(url.startsWith("res")){
+                return new UMImage(ma, ResContainer.getResourceId(ma,"drawable",url.replace("res/","")));
+            }
         }
+
+
+        return new UMImage(ma,url);
     }
 
     /**
@@ -108,15 +128,28 @@ public class RNUMShare extends ReactContextBaseJavaModule {
      * @param ma
      */
     private void shareImage(ReadableMap newParams, SHARE_MEDIA share_media, Activity ma){
-        UMImage image = new UMImage(ma, newParams.getString("poster"));//网络图
-        UMImage thumb =  new UMImage(ma, newParams.getString("poster"));//缩略图
+
+        String uri = newParams.getString("poster").replaceFirst("https","http");
+        UMImage image = null;
+        UMImage thumb = null;
+        if(uri.toString().indexOf("file:///") != -1){
+            File file = new File(uri.toString().replaceFirst("file:///","/"));
+            image =  new UMImage(ma,file);
+            thumb = new UMImage(ma,file);
+        }else {
+            image = new UMImage(ma,uri);
+            thumb = new UMImage(ma,uri);
+        }
         thumb.compressStyle = UMImage.CompressStyle.SCALE;
         image.setThumb(thumb);
 
         new ShareAction(ma)
+                .withText("点到")
                 .withMedia(image)
                 .setPlatform(share_media)
                 .share();
+
+
     }
 
     /**
@@ -126,25 +159,22 @@ public class RNUMShare extends ReactContextBaseJavaModule {
      * @param ma 那个activity发起，
      */
     private void shareWeb(ReadableMap newParams, SHARE_MEDIA share_media, Activity ma){
-        String urlStr = "http://www.diandao.org";
-        String title = "点到上门按摩服务！";
-        String content = "小伙伴快来按摩吧！";
-        if (newParams.hasKey("t_url") && newParams.getString("t_url") != null && !"".equals(newParams.getString("t_url"))){
-            urlStr = newParams.getString("t_url");
-        }
-        if (newParams.hasKey("title") && newParams.getString("title") != null && !"".equals(newParams.getString("title"))){
-            title = newParams.getString("title");
-        }
-        if (newParams.hasKey("content") && newParams.getString("content") != null && !"".equals(newParams.getString("content"))){
-            content = newParams.getString("content");
-        }
-        UMWeb web = new UMWeb(urlStr);
-        web.setTitle(title);
-        web.setDescription(content);
+        //否则统一都是网址分享
+        UMWeb web = new UMWeb(newParams.getString("t_url"));
+        web.setTitle(newParams.getString("title"));
+        web.setDescription(newParams.getString("content"));
         if (newParams.hasKey("img_path")){
-            web.setThumb(getImage(newParams.getString("img_path")));
+            if (newParams.getString("img_path") != null){
+                web.setThumb(getImage(newParams.getString("img_path").replaceFirst("https","http")));
+            }
+
         }else {
-            web.setThumb(new UMImage(ma, R.drawable.share));
+            //获取主程序的R.drawable.share文件，如果为空，则使用当前com.kk.rnumsdk包的R.drawable.share
+            int nShare = RNUmsdkImpl.AppResource.getDrawableResourceId("share");
+            if (nShare == 0){
+                nShare = R.drawable.share;
+            }
+            web.setThumb(new UMImage(ma,nShare));
         }
         new ShareAction(ma)
                 .withMedia(web)
@@ -163,7 +193,7 @@ public class RNUMShare extends ReactContextBaseJavaModule {
         //分享微信小程序 t_url兼容低版本的网页链接
         UMMin umMin = new UMMin(newParams.getString("t_url"));
         // 小程序消息封面图片
-        umMin.setThumb(getImage(newParams.getString("img_path")));
+        umMin.setThumb(getImage(newParams.getString("img_path").replaceFirst("https","http"))); //img.diandao.org ssl证书问题
         // 小程序消息title
         umMin.setTitle(newParams.getString("title"));
         // 小程序消息描述 "pages/page10007/xxxxxx"
@@ -179,33 +209,6 @@ public class RNUMShare extends ReactContextBaseJavaModule {
 
     }
 
-    /**
-     * 分享纯文本，qq不支持纯文本
-     * @param newParams
-     * @param share_media
-     * @param ma
-     */
-    private void shareText(ReadableMap newParams, SHARE_MEDIA share_media, Activity ma){
-
-
-        if (share_media == SHARE_MEDIA.QQ){
-            shareWeb(newParams, share_media, ma);
-        } else {
-            String text = "分享默认文案";
-            if (newParams.getString("title") != null && !"".equals(newParams.getString("title"))){
-                text = newParams.getString("title");
-            }
-            new ShareAction(ma)
-                    .withText(text)
-                    .setPlatform(share_media)
-                    .share();
-        }
-
-    }
-    @Override
-    public String getName() {
-        return "RNUMShare";
-    }
 
     /**
      * 调起无UI 分享
@@ -214,63 +217,51 @@ public class RNUMShare extends ReactContextBaseJavaModule {
      * @param params
      * @param successCallback
      */
-    @ReactMethod
     public void shareToPlatform(final Integer platformType, final String shareType, final ReadableMap params, final Callback successCallback){
-
-        mainHandler.post(new Runnable() {
+        Activity ma = reactContext.getCurrentActivity();
+        if (ma == null){
+            return;
+        }
+        runOnMainThread(new Runnable() {
             @Override
             public void run() {
                 try {
                     ReadableMap newParams = (ReadableMap)params;
-                    SHARE_MEDIA share_media = platformType(platformType);
-
-                    /**
-                     * ma
-                     * 调起分享的Activity
-                     * 如果需要回调，则需要将回调方法实现在Activity ma中,(例如这里的ma为mainActivity，则回调就卸载mainActivity中)
-                     * 这里没有使用mainActivity，因为不需要回调
-                     */
-                    Activity ma = getCurrentActivity();
+                    SHARE_MEDIA share_media = null;
+                    if ( platformType == 2 ) {
+                        //朋友圈
+                        share_media = SHARE_MEDIA.WEIXIN_CIRCLE;
+                    } else if ( platformType == 4 ) {
+                        //QQ
+                        share_media = SHARE_MEDIA.QQ;
+                    } else if ( platformType == 1 ) {
+                        //微信聊天窗口
+                        share_media = SHARE_MEDIA.WEIXIN;
+                    }
                     if ( share_media != null && params != null ){
-                        if (shareType.equals("MiniProgram") && share_media == SHARE_MEDIA.WEIXIN){
+                        if (shareType.equals("MiniProgram")){
 //                                if (successCallback != null){
 //                                    successCallback.invoke(101,"WX");
 //                                }
-                            //分享微信小程序
-                           shareWXMiniProgram(newParams, share_media, ma);
+                            shareWXMiniProgram(newParams,share_media,ma);
 
-                        } else if (shareType.equals("Image")){
-                            //分享图片
-//                                if (successCallback !=null){
-//                                    successCallback.invoke(101,"WXC");
-//                                }
-                            shareImage(newParams, share_media, ma);
-                        } else if (newParams.getString("t_url") != null && !"".equals(newParams.getString("t_url"))){
+                        } else if ( shareType.equals("Image") ) {
+                            shareImage(newParams,share_media,ma);
+
+
+                        } else {
 //                                if (successCallback != null){
 //                                    successCallback.invoke(101,"QQ");
 //                                }
-                            //否则统一都是网址分享
-                          shareWeb(newParams, share_media, ma);
-                        } else {
-                            //qq不支持纯文本
-                            shareText(newParams, share_media, ma);
-                            String text = "分享给大家！";
-                            if (newParams.getString("title") != null && !"".equals(newParams.getString("title"))){
-                                text = newParams.getString("title");
-                            }
-                            new ShareAction(ma)
-                                    .withText(text)
-                                    .setPlatform(share_media)
-                                    .share();
+                            shareWeb(newParams,share_media,ma);
+
                         }
                     }
                 }catch (Exception e){
-
                 }
 
             }
         });
-
     }
 
     /**
@@ -278,12 +269,19 @@ public class RNUMShare extends ReactContextBaseJavaModule {
      * @param platformType
      * @param successCallback
      */
-    @ReactMethod
     public void auth(final int  platformType, final Callback successCallback){
-        mainHandler.post(new Runnable() {
+        Activity activity = this.reactContext.getCurrentActivity();
+        if (activity == null){
+            return;
+        }
+        runOnMainThread(new Runnable() {
             @Override
             public void run() {
-                UMShareAPI.get(getCurrentActivity()).getPlatformInfo(getCurrentActivity(), platformType(platformType), new UMAuthListener() {
+                int n_p = platformType;
+                if (n_p == 2 || n_p == 1){
+                    n_p = 1;//1、2都是微信登录
+                }
+                UMShareAPI.get(activity).getPlatformInfo(activity, getShareMedia(n_p), new UMAuthListener() {
                     @Override
                     public void onStart(SHARE_MEDIA share_media) {
 
@@ -314,6 +312,113 @@ public class RNUMShare extends ReactContextBaseJavaModule {
             }
         });
 
+    }
+
+    public void isInstall(String platform, Callback callback){
+        SHARE_MEDIA share_media = null;
+        boolean isInstall = false;
+        if ( platform.equals("QQ") ){
+            Tencent.setIsPermissionGranted(true);
+            share_media = SHARE_MEDIA.QQ;
+
+        }else if ( platform.equals("WX_LINE") ){
+            share_media = SHARE_MEDIA.WEIXIN_CIRCLE;
+
+        }else if ( platform.equals("WX_SESSION") ){
+            share_media = SHARE_MEDIA.WEIXIN;
+
+        }
+        if (share_media != null ){
+            try {
+                Activity ma = this.reactContext.getCurrentActivity();
+                isInstall =  UMShareAPI.get(ma).isInstall(ma,share_media);
+            }catch (Exception e){
+                isInstall = false;
+            }
+
+        }
+        if (callback != null) {
+            callback.invoke(isInstall);
+        }
+    };
+
+
+    private SHARE_MEDIA getShareMedia(int num){
+        switch (num){
+            case 0:
+                return SHARE_MEDIA.SINA;
+
+            case 1:
+                return SHARE_MEDIA.WEIXIN;
+
+            case 2:
+                return SHARE_MEDIA.WEIXIN_CIRCLE;
+
+            case 3:
+                return SHARE_MEDIA.QZONE;
+            case 4:
+                return SHARE_MEDIA.QQ;
+            case 5:
+                return SHARE_MEDIA.EMAIL;
+            case 6:
+                return SHARE_MEDIA.SMS;
+            case 7:
+                return SHARE_MEDIA.FACEBOOK;
+            case 8:
+                return SHARE_MEDIA.TWITTER;
+            case 9:
+                return SHARE_MEDIA.WEIXIN_FAVORITE;
+//            case 10:
+//                return SHARE_MEDIA.GOOGLEPLUS;
+//            case 11:
+//                return SHARE_MEDIA.RENREN;
+//            case 12:
+//                return SHARE_MEDIA.TENCENT;
+            case 13:
+                return SHARE_MEDIA.DOUBAN;
+            case 14:
+                return SHARE_MEDIA.FACEBOOK_MESSAGER;
+            case 15:
+                return SHARE_MEDIA.YIXIN;
+            case 16:
+                return SHARE_MEDIA.YIXIN_CIRCLE;
+            case 17:
+                return SHARE_MEDIA.INSTAGRAM;
+            case 18:
+                return SHARE_MEDIA.PINTEREST;
+            case 19:
+                return SHARE_MEDIA.EVERNOTE;
+            case 20:
+                return SHARE_MEDIA.POCKET;
+            case 21:
+                return SHARE_MEDIA.LINKEDIN;
+            case 22:
+                return SHARE_MEDIA.FOURSQUARE;
+            case 23:
+                return SHARE_MEDIA.YNOTE;
+            case 24:
+                return SHARE_MEDIA.WHATSAPP;
+            case 25:
+                return SHARE_MEDIA.LINE;
+            case 26:
+                return SHARE_MEDIA.FLICKR;
+            case 27:
+                return SHARE_MEDIA.TUMBLR;
+            case 28:
+                return SHARE_MEDIA.ALIPAY;
+            case 29:
+                return SHARE_MEDIA.KAKAO;
+            case 30:
+                return SHARE_MEDIA.DROPBOX;
+            case 31:
+                return SHARE_MEDIA.VKONTAKTE;
+            case 32:
+                return SHARE_MEDIA.DINGTALK;
+            case 33:
+                return SHARE_MEDIA.MORE;
+            default:
+                return SHARE_MEDIA.QQ;
+        }
     }
 
 }

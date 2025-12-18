@@ -1,4 +1,4 @@
-package com.kk.RNUMSDK;
+package com.kk.rnumsdk;
 
 import android.app.Notification;
 import android.content.Context;

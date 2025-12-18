@@ -1,4 +1,4 @@
-package com.kk.RNUMSDK;
+package com.kk.rnumsdk;
 
 import android.app.Application;
 import android.app.Notification;
@@ -12,17 +12,34 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.facebook.react.bridge.Callback;
 import com.umeng.message.IUmengRegisterCallback;
 import com.umeng.message.MsgConstant;
 import com.umeng.message.PushAgent;
 import com.umeng.message.UTrack;
 import com.umeng.message.UmengMessageHandler;
 import com.umeng.message.UmengNotificationClickHandler;
+import com.umeng.message.api.UPushRegisterCallback;
 import com.umeng.message.common.UPushNotificationChannel;
 import com.umeng.message.entity.UMessage;
-
 public class RNUMPush {
     private Handler handler;
+    //原旧RNUMPush模块方法
+    public static void getDeviceToken(Callback callback, Context applicatioContext){
+
+        SharedPreferences userData = applicatioContext.getSharedPreferences("userDataRN", Context.MODE_PRIVATE);
+        String  deviceToken = "";
+        if (userData != null){
+            deviceToken = userData.getString("deviceToken","");
+        }
+        if (callback != null) {
+            callback.invoke(deviceToken);
+        }
+    };
+    //与iOS保持一致方法，android没有实际方法
+    public static void getNonification(Callback callback, Context applicatioContext){
+
+    };
 
     public void initUpush(final Context context, final UMPUSHCallback umcallback) {
 
@@ -45,7 +62,7 @@ public class RNUMPush {
              * 自定义通知栏样式的回调方法
              */
             @Override
-                public Notification getNotification(Context context, UMessage msg) {
+            public Notification getNotification(Context context, UMessage msg) {
                 System.out.println("新消息消息getNotification"+msg.extra.get("audioStyle"));
 //
                 if (umcallback != null) {
@@ -78,10 +95,10 @@ public class RNUMPush {
                         if (isClickOrDismissed) {
                             //自定义消息的点击统计
 
-                            UTrack.getInstance(context).trackMsgClick(msg);
+                            UTrack.getInstance().trackMsgClick(msg);
                         } else {
                             //自定义消息的忽略统计
-                            UTrack.getInstance(context).trackMsgDismissed(msg);
+                            UTrack.getInstance().trackMsgDismissed(msg);
                         }
                     }
                 });
@@ -99,14 +116,14 @@ public class RNUMPush {
             @Override
             public void dealWithCustomAction(Context context, UMessage msg) {
                 //统计点击率
-                UTrack.getInstance(context).trackMsgClick(msg);
+                UTrack.getInstance().trackMsgClick(msg);
             }
         };
         //使用自定义的NotificationHandler，来结合友盟统计处理消息通知，参考http://bbs.umeng.com/thread-11112-1-1.html
         mPushAgent.setNotificationClickHandler(notificationClickHandler);
 
         //注册推送服务 每次调用register都会回调该接口
-        mPushAgent.register(new IUmengRegisterCallback() {
+        mPushAgent.register(new UPushRegisterCallback() {
             @Override
             public void onSuccess(String deviceToken) {
 //                Log.i("deviceToken33", deviceToken);
@@ -138,29 +155,7 @@ public class RNUMPush {
         mPushAgent.setNotificationPlaySound(MsgConstant.NOTIFICATION_PLAY_SERVER);
 
         //各主要厂商推送实现
-        //小米通道
-        //XIAOMI_ID, XIAOMI_KEY
-//        if(RomUtil.isMiui()) {
-//            MiPushRegistar.register(getApplicationContext(), "2882303761517300206", "5761730045206");
-//        }
-//        //华为通道
-//        if(RomUtil.isEmui()) {
-//            HuaWeiRegister.register(getApplicationContext());
-//        }
-//        //魅族通道
-//        //MEIZU_APPID, MEIZU_APPKEY
-//        if(RomUtil.isFlyme()) {
-//            MeizuRegister.register(getApplicationContext(), "117222", "ea545aa766514cbbb25c5545188a6678");
-//        }
 
-        //Vivo
-        //    if(RomUtil.isVivo()){
-        //      initVivoPush();
-        //    }
-        //Oppo
-        //    if(RomUtil.isOppo()){
-        //
-        //    }
 
     }
 }
