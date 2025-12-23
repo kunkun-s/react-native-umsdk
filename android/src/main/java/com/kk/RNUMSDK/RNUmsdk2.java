@@ -43,6 +43,10 @@ public class RNUmsdk2 extends ReactContextBaseJavaModule {
         sdkImpl.getDeviceToken(callback);
     };
     @ReactMethod
+    public void getNonification(Callback callback){
+        sdkImpl.getNonification(callback);
+    };
+    @ReactMethod
     public void auth(String platformType, Callback callback){
         sdkImpl.auth(platformType, callback);
     };

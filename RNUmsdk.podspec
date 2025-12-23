@@ -12,7 +12,8 @@ Pod::Spec.new do |s|
   s.author             = { "author" => "author@domain.cn" }
   s.platform     = :ios, "7.0"
   s.source       = { :git => "https://github.com/author/RNUmsdk.git", :tag => "master" }
-  s.source_files  = "ios/*.{h,m}","ios/libs/share/**/SocialLibraries/*/UMSocial*Handler.h","ios/class/**/*.{h,m}","ios/libs/share/**/SocialLibraries/WeChat/WechatSDK/*.h"
+  #,"ios/libs/share/**/SocialLibraries/*/UMSocial*Handler.h","ios/libs/share/**/SocialLibraries/WeChat/WechatSDK/*.h"
+  s.source_files  = "ios/**/*.{h,m,mm}"
 
   s.requires_arc = true
 =begin
@@ -43,6 +44,8 @@ Pod::Spec.new do |s|
   s.dependency "UMAPM",'~> 1.5.3'
   #s.dependency "others"
   s.dependency 'WechatOpenSDK',"~> 1.8.7.1"
+
+  install_modules_dependencies(s)
 end
 
   

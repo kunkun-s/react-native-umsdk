@@ -56,22 +56,40 @@ public class RNUMShare {
      * 配置分享平台
      * @param platforms
      */
-    public static void setUMSharePlatforms(final Map<String,Map>platforms) {
+    public static void setUMSharePlatforms(final Map<String,Map<String, String>>platforms) {
         //配置分享目标平台
         if (platforms != null && !platforms.isEmpty()){
-
+            String provider = null;
             if( platforms.get("WX") != null ){
                 Map<String,String> wxMap = platforms.get("WX");
-                // 微信设置
-                PlatformConfig.setWeixin(wxMap.get("appID"),wxMap.get("appKey"));
-                PlatformConfig.setWXFileProvider(wxMap.get("provider"));
+                if (wxMap != null ){
+                    if ( wxMap.get("provider") != null){
+                        provider = wxMap.get("provider");
+                    }
+                    // 微信设置
+                    if (wxMap.get("appID") != null && wxMap.get("appKey") != null){
+                        PlatformConfig.setWeixin(wxMap.get("appID"),wxMap.get("appKey"));
+
+                    }
+                }
+
             }
             if ( platforms.get("QQ") != null) {
                 Map<String,String> qqMap = platforms.get("QQ");
-                // QQ设置
-                PlatformConfig.setQQZone(qqMap.get("appID"),qqMap.get("appKey"));
-                PlatformConfig.setQQFileProvider(qqMap.get("provider"));
+                if (qqMap != null){
+                    if (qqMap.get("provider") != null){
+                        provider = qqMap.get("provider");
+                    }
+                    if (qqMap.get("appID")!=null && qqMap.get("appKey")!=null){
+                        // QQ设置
+                        PlatformConfig.setQQZone(qqMap.get("appID"),qqMap.get("appKey"));
+                    }
 
+                }
+
+            }
+            if (provider!= null){
+                PlatformConfig.setFileProvider(provider);
             }
         }
 

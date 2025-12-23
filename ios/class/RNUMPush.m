@@ -6,12 +6,13 @@
 //
 
 #import "RNUMPush.h"
+#import "KKUMSdkEventEmitter.h"
 
-#define NONIFICATION_CENTER @"userNotificationCenter"
 
-@implementation RNUMPush
 
 static RNUMPush * push = nil;
+
+@implementation RNUMPush
 
 +(RNUMPush *)shareRNUMPush{
     if (!push) {
@@ -30,7 +31,6 @@ static RNUMPush * push = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         push = [super init];
-        push.hasListeners = NO;
     });
     if (push) {
         self = push;
@@ -96,8 +96,7 @@ static RNUMPush * push = nil;
     [UMessage setAutoAlert:NO];
     //必须加这句代码
     [UMessage didReceiveRemoteNotification:userInfo];
-      
-    [RNUMPush sendEventWithName:NONIFICATION_CENTER body:userInfo];
+    [RNUMPush sendEventWithName:NONIFICATION_TYPE body:userInfo];
   }else{
     //应用处于前台时的本地推送接受
   }
@@ -114,8 +113,8 @@ static RNUMPush * push = nil;
     //将通知消息暂存
     [[NSUserDefaults standardUserDefaults] setObject:userInfo forKey:@"RN_UM_NONIFICATION_BACK"];
     [[NSUserDefaults standardUserDefaults] synchronize];
-
-      [RNUMPush sendEventWithName:NONIFICATION_CENTER body:userInfo];
+      
+    [RNUMPush sendEventWithName:NONIFICATION_TYPE body:userInfo];
     
   }else{
     //应用处于后台时的本地推送接受
@@ -126,7 +125,7 @@ static RNUMPush * push = nil;
     [UMessage setAutoAlert:NO];
     if([[[UIDevice currentDevice] systemVersion]intValue] < 10){
         [UMessage didReceiveRemoteNotification:userInfo];
-        [RNUMPush sendEventWithName:NONIFICATION_CENTER body:userInfo];
+        [RNUMPush sendEventWithName:NONIFICATION_TYPE body:userInfo];
         
       completionHandler(UIBackgroundFetchResultNewData);
     }
@@ -138,48 +137,28 @@ static RNUMPush * push = nil;
     }
 }
 
-RCT_EXPORT_MODULE(RNUMPush)
-- (NSArray<NSString *> *)supportedEvents
-{
-  return @[ NONIFICATION_CENTER ];
-}
-- (void)reactMessage:(id)body {
-    [self sendEventWithName:NONIFICATION_CENTER body:body];
-}
 + (void)sendEventWithName:(NSString *)name body:(id)body{
     
-    if ([RNUMPush shareRNUMPush].hasListeners) {
-        
-        NSDictionary * parmas = [RNUMPush creactData:body];
-        [[RNUMPush shareRNUMPush] sendEventWithName:name body:parmas];
+    NSDictionary * parmas = [RNUMPush creactData:body];
+    [[KKUMSdkEventEmitter sharedInstance] sendEventWithName:name body:body];
+
+}
+
++ (NSDictionary *)getNonification{
+    NSUserDefaults * userdf = [NSUserDefaults standardUserDefaults];
+    if ([userdf objectForKey:@"RN_UM_NONIFICATION_BACK"]) {
+        //有消息返回并删除旧消息
+        NSDictionary * params =  [RNUMPush creactData:[userdf objectForKey:@"RN_UM_NONIFICATION_BACK"]];
+        [userdf removeObjectForKey:@"RN_UM_NONIFICATION_BACK"];//删除这条推送消息
+        return params;
     }
+    return @{}.mutableCopy;
+}
++ (NSString *)getDeviceToken{
+    NSString *deviceToken = [[NSUserDefaults standardUserDefaults] objectForKey:@"deviceToken"];
+    return deviceToken?deviceToken:@"";
+}
 
-}
-// 在添加第一个监听函数时触发
--(void)startObserving {
-    [RNUMPush shareRNUMPush].hasListeners = YES;
-    // Set up any upstream listeners or background tasks as necessary
-}
-
-// Will be called when this module's last listener is removed, or on dealloc.
--(void)stopObserving {
-    [RNUMPush shareRNUMPush].hasListeners = NO;
-    // Remove upstream listeners, stop unnecessary background tasks
-}
-RCT_REMAP_METHOD(getNonification, getNonification:(RCTResponseSenderBlock)callback){
-  NSUserDefaults * userdf = [NSUserDefaults standardUserDefaults];
-  if ([userdf objectForKey:@"RN_UM_NONIFICATION_BACK"]) {
-      //有消息返回并删除旧消息
-      NSDictionary * params =  [RNUMPush creactData:[userdf objectForKey:@"RN_UM_NONIFICATION_BACK"]];
-      callback(@[params]);//返回应用在后台时接受的暂存消息
-      [userdf removeObjectForKey:@"RN_UM_NONIFICATION_BACK"];//删除这条推送消息
-  }
-}
-RCT_REMAP_METHOD(getDeviceToken, getDeviceToken:(RCTResponseSenderBlock)callback){
-  NSString *deviceToken = [[NSUserDefaults standardUserDefaults] objectForKey:@"deviceToken"];
-  deviceToken =  deviceToken?deviceToken:@"";
-  callback(@[deviceToken]);
-}
 + (BOOL)requiresMainQueueSetup {
   return YES;
 }

@@ -34,6 +34,10 @@ public class RNUmsdk extends NativeUMSdkModuleSpec{
         sdkImpl.getDeviceToken(callback);
     };
     @Override
+    public void getNonification(Callback callback){
+        sdkImpl.getNonification(callback);
+    };
+    @Override
     public void auth(String platformType, Callback callback){
         sdkImpl.auth(platformType, callback);
     };

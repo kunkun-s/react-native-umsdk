@@ -17,12 +17,14 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.module.model.ReactModuleInfo;
 import com.facebook.react.module.model.ReactModuleInfoProvider;
 
-public class RNUmsdkPackage implements BaseReactPackage {
+public class RNUmsdkPackage extends BaseReactPackage {
 
     @Nullable
     @Override
     public NativeModule getModule(String name, @NonNull ReactApplicationContext reactContext) {
-        if (name.equals(RNUmsdkImpl.NAME)) {
+        if(name.equals(KKUMSdkEventEmitter.NAME)){
+            return  new KKUMSdkEventEmitter(reactContext);
+        }else if (name.equals(RNUmsdkImpl.NAME)) {
             /**
              * 1.新旧架构都在com.dddverify包内
              * 2.新旧架构文件同名
@@ -37,14 +39,16 @@ public class RNUmsdkPackage implements BaseReactPackage {
             return null;
         }
     }
+    @NonNull
     @Override
     public ReactModuleInfoProvider getReactModuleInfoProvider() {
         return new ReactModuleInfoProvider() {
+            @NonNull
             @Override
             public Map<String, ReactModuleInfo> getReactModuleInfos() {
                 Map<String, ReactModuleInfo> map = new HashMap<>();
                 boolean isTurboModule = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
-
+                //新增模块
                 map.put(RNUmsdkImpl.NAME, new ReactModuleInfo(
                         RNUmsdkImpl.NAME,       // name
                         RNUmsdkImpl.NAME,       // className
@@ -52,6 +56,15 @@ public class RNUmsdkPackage implements BaseReactPackage {
                         false, // needsEagerInit
                         false, // isCXXModule
                         isTurboModule   // isTurboModule
+                ));
+                // 新增的事件发射器模块
+                map.put(KKUMSdkEventEmitter.NAME, new ReactModuleInfo(
+                        KKUMSdkEventEmitter.NAME,       // name
+                        KKUMSdkEventEmitter.NAME,       // className
+                        false, // canOverrideExistingModule
+                        false, // needsEagerInit
+                        false, // isCXXModule
+                        false  // isTurboModule - 事件发射器通常不需要是TurboModule
                 ));
                 return map;
             }

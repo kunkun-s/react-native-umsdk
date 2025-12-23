@@ -45,7 +45,7 @@
 }
 
 
-- (UMSocialPlatformType)platformType:(NSInteger)platform
++ (UMSocialPlatformType)platformType:(NSInteger)platform
 {
     
   switch (platform) {
@@ -65,7 +65,7 @@
       return UMSocialPlatformType_WechatSession;
   }
 }
-- (id)getImage:(NSString *)imageName{
++ (id)getImage:(NSString *)imageName{
 //    NSString * imageName = [dic objectForKey:@"poster"] ? [dic objectForKey:@"poster"] : [dic objectForKey:@"img_path"] ? [dic objectForKey:@"img_path"] : nil;
     UIImage * image = nil;
     if (imageName == nil) {
@@ -85,10 +85,10 @@
     return image;
 }
 /**图片*/
--(UMShareImageObject *) shareImageObject:(NSDictionary *)dic{
++(UMShareImageObject *) shareImageObject:(NSDictionary *)dic{
     UMShareImageObject *shareObject = [[UMShareImageObject alloc] init];
     NSString * imageName = [dic objectForKey:@"poster"] ? [dic objectForKey:@"poster"] : [dic objectForKey:@"img_path"] ? [dic objectForKey:@"img_path"] : nil;
-    UIImage * image = [self getImage:imageName];
+    UIImage * image = [RNUMShare getImage:imageName];
    
     //如果有缩略图，则设置缩略图本地
     shareObject.thumbImage = image;
@@ -97,9 +97,9 @@
     return shareObject;
 }
 /**小程序*/
--(UMShareMiniProgramObject *)shareMiniProgramObject:(NSDictionary *)dic{
++(UMShareMiniProgramObject *)shareMiniProgramObject:(NSDictionary *)dic{
   //这里只能是小程序
-    UIImage * image = [self getImage:[dic objectForKey:@"img_path"]?[dic objectForKey:@"img_path"]:[UIImage imageNamed:@"defaultShare"]];
+    UIImage * image = [RNUMShare getImage:[dic objectForKey:@"img_path"]?[dic objectForKey:@"img_path"]:[UIImage imageNamed:@"defaultShare"]];
   UMShareMiniProgramObject *shareObject = [UMShareMiniProgramObject shareObjectWithTitle:[dic objectForKey:@"title"] descr:[dic objectForKey:@"content"] thumImage:image];
   shareObject.webpageUrl = [dic objectForKey:@"t_url"]?[dic objectForKey:@"t_url"]:@"http://www.diandao.org/";
   shareObject.userName = [dic objectForKey:@"userName"];
@@ -116,9 +116,9 @@
      
 }
 /**网页分享*/
--(UMShareWebpageObject *)shareWebObject:(NSDictionary *)dic{
++(UMShareWebpageObject *)shareWebObject:(NSDictionary *)dic{
   // 获取技师图片和 要发的话（字符串）
-  UIImage * upImage = [self getImage:[dic objectForKey:@"img_path"]];
+  UIImage * upImage = [RNUMShare getImage:[dic objectForKey:@"img_path"]];
  
   //创建网页内容对象
   UMShareWebpageObject *shareObject = [UMShareWebpageObject shareObjectWithTitle:[dic objectForKey:@"title"] descr:[dic objectForKey:@"content"] thumImage:upImage];
@@ -127,8 +127,6 @@
   
   return shareObject;
 }
-
-RCT_EXPORT_MODULE(RNUMShare)
 
 //不带UI直接分享 shareType: MiniProgram、Image、web
 /**
@@ -139,32 +137,32 @@ RCT_EXPORT_MODULE(RNUMShare)
  content
  }
  */
-RCT_REMAP_METHOD(shareToPlatform, shareToPlatform:(NSInteger )platformType shareType:(NSString *)shareType params:(NSDictionary *)params completion:(RCTResponseSenderBlock)callBack){
++(void)shareToPlatform:(NSInteger )platformType shareType:(NSString *)shareType params:(NSDictionary *)params completion:(RCTResponseSenderBlock)callBack{
   
   UMSocialMessageObject *messageObject = [UMSocialMessageObject messageObject];
   
   if([shareType isEqualToString: @"MiniProgram"]){
-    messageObject.shareObject = [self shareMiniProgramObject:params];
+    messageObject.shareObject = [RNUMShare shareMiniProgramObject:params];
     
   }else if([shareType isEqualToString: @"Image"]){
-    messageObject.shareObject = [self shareImageObject:params];
+    messageObject.shareObject = [RNUMShare shareImageObject:params];
     
   }else if([params objectForKey:@"t_url"]){
     //否则默认是Webpage 网页分享
-    messageObject.shareObject = [self shareWebObject:params];
+    messageObject.shareObject = [RNUMShare shareWebObject:params];
     
   } else {
     //默认为纯文字分享
       if (platformType == 4) {
           //qq 不支持纯文本分享
-          messageObject.shareObject = [self shareWebObject:params];
+          messageObject.shareObject = [RNUMShare shareWebObject:params];
       } else {
           messageObject.text = [params objectForKey:@"title"] ? [params objectForKey:@"title"] : @"分享给大家！";
       }
   }
   
   //调用分享接口
-  [[UMSocialManager defaultManager] shareToPlatform:[self platformType:platformType] messageObject:messageObject currentViewController:nil completion:^(id data, NSError *error) {
+  [[UMSocialManager defaultManager] shareToPlatform:[RNUMShare platformType:platformType] messageObject:messageObject currentViewController:nil completion:^(id data, NSError *error) {
 
     if (callBack) {
       if (error) {
@@ -186,34 +184,27 @@ RCT_REMAP_METHOD(shareToPlatform, shareToPlatform:(NSInteger )platformType share
     }
   }];
 }
++(BOOL)isInstall:(NSString *)platform{
+    UMSocialPlatformType platformType = -1111;
+    BOOL isInstall = NO;
+    if ([platform isEqualToString:@"QQ"]) {
+      platformType = UMSocialPlatformType_QQ;
 
-RCT_REMAP_METHOD(isInstall, isInstall:(NSString *)platform completion:(RCTResponseSenderBlock)callBack){
-  
-  UMSocialPlatformType platformType = -1111;
-  BOOL isInstall = NO;
-  if ([platform isEqualToString:@"QQ"]) {
-    platformType = UMSocialPlatformType_QQ;
+    }else if ([platform isEqualToString:@"WX_LINE"]){
+      platformType = UMSocialPlatformType_WechatTimeLine;
 
-  }else if ([platform isEqualToString:@"WX_LINE"]){
-    platformType = UMSocialPlatformType_WechatTimeLine;
-
-  }else if([platform isEqualToString:@"WX_SESSION"]){
-    platformType = UMSocialPlatformType_WechatSession;
-  }
-  if (platformType != -1111) {
-    isInstall = [[UMSocialManager defaultManager]isInstall:platformType] ? YES : NO;
-  }
-  
-  
-  if (callBack) {
-      callBack( @[@(isInstall)]) ;
-  }
+    }else if([platform isEqualToString:@"WX_SESSION"]){
+      platformType = UMSocialPlatformType_WechatSession;
+    }
+    if (platformType != -1111) {
+      isInstall = [[UMSocialManager defaultManager]isInstall:platformType] ? YES : NO;
+    }
+    return isInstall;
 }
 
 
-RCT_EXPORT_METHOD(auth:(NSInteger)platform completion:(RCTResponseSenderBlock)completion)
-{
-  UMSocialPlatformType plf = [self platformType:platform];
++(void)auth:(NSInteger)platform completion:(RCTResponseSenderBlock)completion{
+  UMSocialPlatformType plf = [RNUMShare platformType:platform];
   if (plf == UMSocialPlatformType_UnKnown) {
     if (completion) {
       completion(@[@(UMSocialPlatformType_UnKnown), @"invalid platform"]);
@@ -262,10 +253,6 @@ RCT_EXPORT_METHOD(auth:(NSInteger)platform completion:(RCTResponseSenderBlock)co
   
 }
 
-- (dispatch_queue_t)methodQueue
-{
-  return dispatch_get_main_queue();
-}
 + (BOOL)requiresMainQueueSetup {
   return YES;
 }

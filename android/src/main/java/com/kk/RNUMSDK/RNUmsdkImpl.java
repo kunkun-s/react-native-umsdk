@@ -5,6 +5,7 @@ import android.app.Activity;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.tencent.tauth.Tencent;
 import com.umeng.analytics.MobclickAgent;
@@ -15,7 +16,7 @@ import com.umeng.socialize.bean.SHARE_MEDIA;
 import javax.annotation.Nullable;
 
 public class RNUmsdkImpl {
-    public static final String NAME = "RNDdverify"; //与NativeDDVerify.ts文件中的get<Spec>('RNDdverify') 保持一致
+    public static final String NAME = "RNUMSdkBridge"; //与NativeDDVerify.ts文件中的get<Spec>('RNDdverify') 保持一致
     public static ReactApplicationContext reactContext;
     public static RNUMShare rn_um_share = null;
     public static KKAppResource AppResource = null;
@@ -27,8 +28,8 @@ public class RNUmsdkImpl {
             AppResource = new KKAppResourceDefault();
         }
     }
-    private static void sendEvent(ReactApplicationContext reactContext, String eventName, @Nullable WritableMap params){
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+    private static void sendEvent(ReactApplicationContext reactContext, String eventName, WritableMap params){
+        KKUMSdkEventEmitter.getInstance().sendEventWithName(eventName, params);
     }
     /**
      * 设置制定的resource，覆盖默认的com.kk.rnumsdk的resource
