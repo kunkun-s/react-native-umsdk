@@ -14,7 +14,7 @@ function getRNUMPush() {
  */
 export const userNotificationCenter = (callback)=>{
 
-    const listeener = new NativeEventEmitter( NativeModules?.RNUMSdkBridge)?.addListener?.('userNotificationCenter', callback);
+    const listeener = new NativeEventEmitter( NativeModules?.KKUMSdkEventEmitter)?.addListener?.('userNotificationCenter', callback);
    
     return listeener
 }
