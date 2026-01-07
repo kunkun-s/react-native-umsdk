@@ -15,7 +15,7 @@ public class KKUMSdkEventEmitter extends ReactContextBaseJavaModule {
     private ReactApplicationContext reactContext;
     private Set<String> activeListeners = new HashSet<>();
     private static KKUMSdkEventEmitter instance;
-    public static String NAME = "RNUMSdkBridge"; //与NativeDDVerify.ts文件中的get<Spec>('RNDdverify') 保持一致
+    public static String NAME = "KKUMSdkEventEmitter"; 
 
     public KKUMSdkEventEmitter(ReactApplicationContext reactContext) {
         super(reactContext);
