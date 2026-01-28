@@ -10,6 +10,10 @@ function getMyReactBridgeManager() {
     }
     return umsdk;
 }
+export function isInstall(platformType, callback){
+    return getMyReactBridgeManager?.()?.isInstall?.(String(platformType), callback);
+}
+
 /**
  * 正式注册umsdk，必须在用户协议同意之后 暂时仅Android
  */
@@ -22,7 +26,7 @@ export function initUMSDK() {
  * @param {*} callback  data,result
  */
 export function auth( platformType, callback) {
-    getMyReactBridgeManager?.().auth(platformType, callback);
+    getMyReactBridgeManager?.().auth(String(platformType), callback);
 }
 /**
  * 用户账户统计，配合onProfileSignOff
@@ -31,7 +35,7 @@ export function auth( platformType, callback) {
  * @param params { userID provider}
  */
 export function profileSignInWithPUID(puid) {
-    getMyReactBridgeManager()?.profileSignInWithPUID?.(puid);
+    getMyReactBridgeManager()?.profileSignInWithPUID?.(String(puid));
 }
 /**
  * 账户统计退出登录时调用（退出账户，不是退出APP）
@@ -44,8 +48,8 @@ export function profileSignOff() {
  * 手动采集页面
  */
 export function onPageStart(viewName) {
-    getMyReactBridgeManager()?.onPageStart?.(viewName);
+    getMyReactBridgeManager()?.onPageStart?.(String(viewName));
 }
 export function onPageEnd(viewName) {
-    getMyReactBridgeManager()?.onPageEnd?.(viewName);
+    getMyReactBridgeManager()?.onPageEnd?.(String(viewName));
 }

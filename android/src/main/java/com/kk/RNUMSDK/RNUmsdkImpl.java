@@ -1,6 +1,8 @@
 package com.kk.rnumsdk;
 
 import android.app.Activity;
+import android.content.Context;
+import android.util.Log;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -17,18 +19,18 @@ import javax.annotation.Nullable;
 
 public class RNUmsdkImpl {
     public static final String NAME = "RNUMSdkBridge"; //与NativeDDVerify.ts文件中的get<Spec>('RNDdverify') 保持一致
-    public static ReactApplicationContext reactContext;
+    public static Context reactContext;
     public static RNUMShare rn_um_share = null;
     public static KKAppResource AppResource = null;
 
-    public RNUmsdkImpl(ReactApplicationContext reactContext){
-        this.reactContext = reactContext;
+    public RNUmsdkImpl(Context context){
+        reactContext = context;
         //默认使用com.kk.rnumsdk的resource
         if (AppResource == null){
             AppResource = new KKAppResourceDefault();
         }
     }
-    private static void sendEvent(ReactApplicationContext reactContext, String eventName, WritableMap params){
+    private static void sendEvent(Context reactContext, String eventName, WritableMap params){
         KKUMSdkEventEmitter.getInstance().sendEventWithName(eventName, params);
     }
     /**
@@ -41,8 +43,8 @@ public class RNUmsdkImpl {
     };
 
     public RNUMShare getShareModule(){
-        if (rn_um_share == null && this.reactContext != null){
-            rn_um_share = new RNUMShare(this.reactContext, AppResource);
+        if (rn_um_share == null && reactContext != null){
+            rn_um_share = new RNUMShare(reactContext, AppResource);
         }
         return  rn_um_share;
     }
@@ -71,19 +73,19 @@ public class RNUmsdkImpl {
     /**
      * 三方登录授权
      */
-    public void auth(String platformType, Callback callback){
+    public void auth( Activity ma, String platformType, Callback callback){
         RNUMShare sm = getShareModule();
-        sm.auth(Integer.parseInt(platformType),callback);
+        sm.auth(ma, Integer.parseInt(platformType),callback);
     };
     //分享
-    public void shareToPlatform(String platformType, String shareType, ReadableMap params, @Nullable Callback callback){
+    public void shareToPlatform(Activity ma, String platformType, String shareType, ReadableMap params, @Nullable Callback callback){
         RNUMShare sm = getShareModule();
-        sm.shareToPlatform(Integer.parseInt(platformType),shareType,params,callback);
+        sm.shareToPlatform(ma, Integer.parseInt(platformType),shareType,params,callback);
     };
     //判断平台是否存在
-    public void isInstall(String platform, Callback callback){
+    public void isInstall(Activity ma, String platform, Callback callback){
         RNUMShare sm = getShareModule();
-        sm.isInstall(platform, callback);
+        sm.isInstall(ma, platform, callback);
     };
 
     /**

@@ -17,7 +17,6 @@
 
 @interface RNUMShare : NSObject
 
-+ (id)getImage:(NSString *)imageName;
 +(UMShareImageObject *) shareImageObject:(NSDictionary *)dic;
 +(UMShareMiniProgramObject *)shareMiniProgramObject:(NSDictionary *)dic;
 +(UMShareWebpageObject *)shareWebObject:(NSDictionary *)dic;

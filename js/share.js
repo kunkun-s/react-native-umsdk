@@ -21,5 +21,5 @@ function getShare() {
  * @param {*} Callback 分享回调，暂时没有回调，
  */
 export function shareToPlatform(platformType, shareType, params, Callback = ()=>{} ) {
-    getShare()?.shareToPlatform(platformType, shareType, params, Callback)
+    getShare()?.shareToPlatform(String(platformType),String(shareType) , params, Callback)
 }

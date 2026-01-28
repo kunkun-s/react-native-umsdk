@@ -12,8 +12,7 @@ Pod::Spec.new do |s|
   s.author             = { "author" => "author@domain.cn" }
   s.platform     = :ios, "7.0"
   s.source       = { :git => "https://github.com/author/RNUmsdk.git", :tag => "master" }
-  #,"ios/libs/share/**/SocialLibraries/*/UMSocial*Handler.h","ios/libs/share/**/SocialLibraries/WeChat/WechatSDK/*.h"
-  s.source_files  = "ios/**/*.{h,m,mm}"
+  s.source_files  = "ios/**/*.{h,m,mm}","ios/libs/share/**/SocialLibraries/*/UMSocial*Handler.h"
 
   s.requires_arc = true
 =begin
@@ -25,11 +24,11 @@ Pod::Spec.new do |s|
     解决：1.将UMSDK -> thirdparties -> UTDID 和 pod 'UMCSecurityPlugins' 删除
 =end
   # 或略WechatSDK 采用自动依赖，工程预留WechatSDK 是防止pod不能下载成功，做备份。
-  s.exclude_files = "ios/libs/**/WeChat/WechatSDK/*",
+  # s.exclude_files = "ios/libs/**/WeChat/WechatSDK/*",
   # 系统的依赖库
   s.framework = "CoreTelephony","SystemConfiguration","WebKit","UserNotifications"
   # 私有framework
-  s.vendored_frameworks = 'ios/libs/**/*.framework'
+  s.vendored_frameworks =  'ios/libs/**/*.framework'
   # 系统的.a
   s.libraries = 'z','sqlite3','c++'
   # 私有的.a
@@ -42,8 +41,11 @@ Pod::Spec.new do |s|
   s.dependency "React"
   # UM错误分析升级为独立SDK，看crash数据请务必集成，可选
   s.dependency "UMAPM",'~> 1.5.3'
+  s.dependency 'UMPush','~> 4.1.3'
+  s.dependency "UMCommon",'~> 7.5.6'
+  s.dependency 'UMDevice','~> 3.4.0'
   #s.dependency "others"
-  s.dependency 'WechatOpenSDK',"~> 1.8.7.1"
+  s.dependency 'WechatOpenSDK',"~> 2.0.5"
 
   install_modules_dependencies(s)
 end

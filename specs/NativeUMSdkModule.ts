@@ -37,5 +37,5 @@ export interface Spec extends TurboModule {
     profileSignOff():void;
 }
 
-// 使用 getEnforcing 而不是 get，确保类型安全
+// 此模块支持新旧版本，因此使用get兼容 而非getEnforcing
 export default TurboModuleRegistry.get<Spec>('RNUMSdkBridge') as Spec|null;

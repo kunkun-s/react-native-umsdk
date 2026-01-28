@@ -39,7 +39,7 @@ static RNUMPush * push = nil;
 }
 
 + (void)initUpus:(NSDictionary * __nullable)launchOptions delegate:(id <UNUserNotificationCenterDelegate> )delegate{
-    // Push功能配置
+
     UMessageRegisterEntity* entity =[[UMessageRegisterEntity alloc] init];
      entity.types =UMessageAuthorizationOptionBadge|UMessageAuthorizationOptionAlert|UMessageAuthorizationOptionSound;
     //如果你期望使用交互式(只有iOS 8.0及以上有)的通知，请参考下面注释部分的初始化代码
@@ -140,7 +140,7 @@ static RNUMPush * push = nil;
 + (void)sendEventWithName:(NSString *)name body:(id)body{
     
     NSDictionary * parmas = [RNUMPush creactData:body];
-    [[KKUMSdkEventEmitter sharedInstance] sendEventWithName:name body:body];
+    [[KKUMSdkEventEmitter sharedInstance] sendEventWithName:name body:parmas];
 
 }
 

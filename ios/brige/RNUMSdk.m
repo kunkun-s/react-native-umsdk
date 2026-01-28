@@ -10,6 +10,10 @@
 #else
 RCT_EXPORT_MODULE(RNUMSdkBridge)
 
+RCT_REMAP_METHOD(preInitUMSDK, preInitUMSDK:(NSString *)appkey channel:(NSString *)channel){
+
+}
+
 RCT_REMAP_METHOD(initUMSDK, initUMSDK:(NSString *)appkey channel:(NSString *)channel secret:(NSString *)secret){
     [[RNUMSdkImpl sharedInstanceDelegate] initUMSDK:appkey channel:channel secret:secret];
 }

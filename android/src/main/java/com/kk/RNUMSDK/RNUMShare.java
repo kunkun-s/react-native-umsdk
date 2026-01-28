@@ -36,10 +36,10 @@ import java.io.File;
 import java.util.Map;
 
 public class RNUMShare {
-    public static ReactApplicationContext reactContext;
+    public static Context reactContext;
     private static Handler mSDKHandler = null;
 
-    public RNUMShare(ReactApplicationContext nReactContext, KKAppResource AppResource) {
+    public RNUMShare(Context nReactContext, KKAppResource AppResource) {
         reactContext = nReactContext;
     }
 
@@ -100,8 +100,8 @@ public class RNUMShare {
      * @param url
      * @return
      */
-    private UMImage getImage(String url){
-        Activity ma = reactContext.getCurrentActivity();
+    private UMImage getImage(Activity ma, String url){
+
         if (TextUtils.isEmpty(url)){
             return null;
         }else if (ma != null){
@@ -183,7 +183,7 @@ public class RNUMShare {
         web.setDescription(newParams.getString("content"));
         if (newParams.hasKey("img_path")){
             if (newParams.getString("img_path") != null){
-                web.setThumb(getImage(newParams.getString("img_path").replaceFirst("https","http")));
+                web.setThumb(getImage(ma,newParams.getString("img_path").replaceFirst("https","http")));
             }
 
         }else {
@@ -211,7 +211,7 @@ public class RNUMShare {
         //分享微信小程序 t_url兼容低版本的网页链接
         UMMin umMin = new UMMin(newParams.getString("t_url"));
         // 小程序消息封面图片
-        umMin.setThumb(getImage(newParams.getString("img_path").replaceFirst("https","http"))); //img.diandao.org ssl证书问题
+        umMin.setThumb(getImage(ma, newParams.getString("img_path").replaceFirst("https","http"))); //img.diandao.org ssl证书问题
         // 小程序消息title
         umMin.setTitle(newParams.getString("title"));
         // 小程序消息描述 "pages/page10007/xxxxxx"
@@ -235,8 +235,7 @@ public class RNUMShare {
      * @param params
      * @param successCallback
      */
-    public void shareToPlatform(final Integer platformType, final String shareType, final ReadableMap params, final Callback successCallback){
-        Activity ma = reactContext.getCurrentActivity();
+    public void shareToPlatform(Activity ma, final Integer platformType, final String shareType, final ReadableMap params, final Callback successCallback){
         if (ma == null){
             return;
         }
@@ -245,17 +244,8 @@ public class RNUMShare {
             public void run() {
                 try {
                     ReadableMap newParams = (ReadableMap)params;
-                    SHARE_MEDIA share_media = null;
-                    if ( platformType == 2 ) {
-                        //朋友圈
-                        share_media = SHARE_MEDIA.WEIXIN_CIRCLE;
-                    } else if ( platformType == 4 ) {
-                        //QQ
-                        share_media = SHARE_MEDIA.QQ;
-                    } else if ( platformType == 1 ) {
-                        //微信聊天窗口
-                        share_media = SHARE_MEDIA.WEIXIN;
-                    }
+                   SHARE_MEDIA share_media = platformType(platformType);
+                   
                     if ( share_media != null && params != null ){
                         if (shareType.equals("MiniProgram")){
 //                                if (successCallback != null){
@@ -287,8 +277,7 @@ public class RNUMShare {
      * @param platformType
      * @param successCallback
      */
-    public void auth(final int  platformType, final Callback successCallback){
-        Activity activity = this.reactContext.getCurrentActivity();
+    public void auth(Activity activity, final int  platformType, final Callback successCallback){
         if (activity == null){
             return;
         }
@@ -299,7 +288,7 @@ public class RNUMShare {
                 if (n_p == 2 || n_p == 1){
                     n_p = 1;//1、2都是微信登录
                 }
-                UMShareAPI.get(activity).getPlatformInfo(activity, getShareMedia(n_p), new UMAuthListener() {
+                UMShareAPI.get(activity).getPlatformInfo(activity, platformType(n_p), new UMAuthListener() {
                     @Override
                     public void onStart(SHARE_MEDIA share_media) {
 
@@ -332,7 +321,7 @@ public class RNUMShare {
 
     }
 
-    public void isInstall(String platform, Callback callback){
+    public void isInstall(Activity ma, String platform, Callback callback){
         SHARE_MEDIA share_media = null;
         boolean isInstall = false;
         if ( platform.equals("QQ") ){
@@ -348,7 +337,7 @@ public class RNUMShare {
         }
         if (share_media != null ){
             try {
-                Activity ma = this.reactContext.getCurrentActivity();
+
                 isInstall =  UMShareAPI.get(ma).isInstall(ma,share_media);
             }catch (Exception e){
                 isInstall = false;
@@ -360,83 +349,5 @@ public class RNUMShare {
         }
     };
 
-
-    private SHARE_MEDIA getShareMedia(int num){
-        switch (num){
-            case 0:
-                return SHARE_MEDIA.SINA;
-
-            case 1:
-                return SHARE_MEDIA.WEIXIN;
-
-            case 2:
-                return SHARE_MEDIA.WEIXIN_CIRCLE;
-
-            case 3:
-                return SHARE_MEDIA.QZONE;
-            case 4:
-                return SHARE_MEDIA.QQ;
-            case 5:
-                return SHARE_MEDIA.EMAIL;
-            case 6:
-                return SHARE_MEDIA.SMS;
-            case 7:
-                return SHARE_MEDIA.FACEBOOK;
-            case 8:
-                return SHARE_MEDIA.TWITTER;
-            case 9:
-                return SHARE_MEDIA.WEIXIN_FAVORITE;
-//            case 10:
-//                return SHARE_MEDIA.GOOGLEPLUS;
-//            case 11:
-//                return SHARE_MEDIA.RENREN;
-//            case 12:
-//                return SHARE_MEDIA.TENCENT;
-            case 13:
-                return SHARE_MEDIA.DOUBAN;
-            case 14:
-                return SHARE_MEDIA.FACEBOOK_MESSAGER;
-            case 15:
-                return SHARE_MEDIA.YIXIN;
-            case 16:
-                return SHARE_MEDIA.YIXIN_CIRCLE;
-            case 17:
-                return SHARE_MEDIA.INSTAGRAM;
-            case 18:
-                return SHARE_MEDIA.PINTEREST;
-            case 19:
-                return SHARE_MEDIA.EVERNOTE;
-            case 20:
-                return SHARE_MEDIA.POCKET;
-            case 21:
-                return SHARE_MEDIA.LINKEDIN;
-            case 22:
-                return SHARE_MEDIA.FOURSQUARE;
-            case 23:
-                return SHARE_MEDIA.YNOTE;
-            case 24:
-                return SHARE_MEDIA.WHATSAPP;
-            case 25:
-                return SHARE_MEDIA.LINE;
-            case 26:
-                return SHARE_MEDIA.FLICKR;
-            case 27:
-                return SHARE_MEDIA.TUMBLR;
-            case 28:
-                return SHARE_MEDIA.ALIPAY;
-            case 29:
-                return SHARE_MEDIA.KAKAO;
-            case 30:
-                return SHARE_MEDIA.DROPBOX;
-            case 31:
-                return SHARE_MEDIA.VKONTAKTE;
-            case 32:
-                return SHARE_MEDIA.DINGTALK;
-            case 33:
-                return SHARE_MEDIA.MORE;
-            default:
-                return SHARE_MEDIA.QQ;
-        }
-    }
 
 }

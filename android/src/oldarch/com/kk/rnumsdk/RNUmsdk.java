@@ -10,10 +10,12 @@ import javax.annotation.Nullable;
 
 public class RNUmsdk extends ReactContextBaseJavaModule {
     public RNUmsdkImpl sdkImpl = null;
+    public static ReactApplicationContext reactContext;
 
-    public RNUmsdk(ReactApplicationContext reactContext) {
-        super(reactContext);
-        sdkImpl = new RNUmsdkImpl(reactContext);
+    public RNUmsdk(ReactApplicationContext context) {
+        super(context);
+        reactContext = context;
+        sdkImpl = new RNUmsdkImpl(context);
     }
 
     @Override
@@ -48,15 +50,15 @@ public class RNUmsdk extends ReactContextBaseJavaModule {
     };
     @ReactMethod
     public void auth(String platformType, Callback callback){
-        sdkImpl.auth(platformType, callback);
+        sdkImpl.auth(reactContext.getCurrentActivity(), platformType, callback);
     };
     @ReactMethod
     public void shareToPlatform(String platformType, String shareType, ReadableMap params, @Nullable Callback callback){
-        sdkImpl.shareToPlatform(platformType, shareType, params, callback);
+        sdkImpl.shareToPlatform(reactContext.getCurrentActivity(), platformType, shareType, params, callback);
     };
     @ReactMethod
     public void isInstall(String platformType, Callback callback){
-        sdkImpl.isInstall(platformType, callback);
+        sdkImpl.isInstall(reactContext.getCurrentActivity(), platformType, callback);
     };
     @ReactMethod
     public void onPageStart(String pageName) {

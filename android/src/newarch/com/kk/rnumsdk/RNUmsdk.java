@@ -9,10 +9,12 @@ import javax.annotation.Nullable;
 public class RNUmsdk extends NativeUMSdkModuleSpec{
 
     public RNUmsdkImpl sdkImpl = null;
-    public RNUmsdk(ReactApplicationContext reactContext) {
+    public static ReactApplicationContext reactContext;
+    public RNUmsdk(ReactApplicationContext context) {
 
-        super(reactContext);
-        sdkImpl = new RNUmsdkImpl(reactContext);
+        super(context);
+        reactContext = context;
+        sdkImpl = new RNUmsdkImpl(context);
     }
 
     @Override
@@ -39,15 +41,15 @@ public class RNUmsdk extends NativeUMSdkModuleSpec{
     };
     @Override
     public void auth(String platformType, Callback callback){
-        sdkImpl.auth(platformType, callback);
+        sdkImpl.auth(reactContext.getCurrentActivity(), platformType, callback);
     };
     @Override
     public void shareToPlatform(String platformType, String shareType, ReadableMap params, @Nullable Callback callback){
-        sdkImpl.shareToPlatform(platformType, shareType, params, callback);
+        sdkImpl.shareToPlatform(reactContext.getCurrentActivity(), platformType, shareType, params, callback);
     };
     @Override
     public void isInstall(String platformType, Callback callback){
-        sdkImpl.isInstall(platformType, callback);
+        sdkImpl.isInstall(reactContext.getCurrentActivity(), platformType, callback);
     };
     @Override
     public void onPageStart(String pageName) {
