@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class KKUMSdkEventEmitter extends ReactContextBaseJavaModule {
     private ReactApplicationContext reactContext;
-    private Set<String> activeListeners = new HashSet<>();
+    private int listenerCount = 0;
     private static KKUMSdkEventEmitter instance;
     public static String NAME = "KKUMSdkEventEmitter"; 
 
@@ -59,17 +59,25 @@ public class KKUMSdkEventEmitter extends ReactContextBaseJavaModule {
                     .emit(eventName, body);
         }
     }
+
     @ReactMethod
     public void addListener(String eventName) {
-        activeListeners.add(eventName);
+        if (listenerCount == 0) {
+            // 首次被监听，
+        }
+
+        listenerCount += 1;
     }
+
     @ReactMethod
-    public void removeListeners(String eventName) {
-        activeListeners.remove(eventName);
-    }
-    @ReactMethod
-    public void removeAllListeners() {
-        activeListeners.clear();
+    public void removeListeners(Integer count) {
+        if (listenerCount>0){
+            listenerCount -= count;
+            if (listenerCount == 0) {
+                // 当没有监听器时，清理资源
+            }
+        }
+
     }
 
     // 便捷方法：发送事件（对应 iOS 的 emitEvent 方法）
