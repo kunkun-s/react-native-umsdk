@@ -6,7 +6,9 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.WritableMap;
 import com.umeng.message.MsgConstant;
 import com.umeng.message.PushAgent;
 import com.umeng.message.UTrack;
@@ -14,6 +16,12 @@ import com.umeng.message.UmengMessageHandler;
 import com.umeng.message.UmengNotificationClickHandler;
 import com.umeng.message.api.UPushRegisterCallback;
 import com.umeng.message.entity.UMessage;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class RNUMPush {
     private Handler handler;
     //原旧RNUMPush模块方法
@@ -32,7 +40,37 @@ public class RNUMPush {
     public static void getNonification(Callback callback, Context applicatioContext){
 
     };
+    public static WritableMap createData(UMessage msg){
+        WritableMap params = Arguments.createMap();
 
+        if (msg == null){
+            return params;
+        }
+        if(msg.extra == null){
+            return params;
+        }
+        if (msg.extra.isEmpty()){
+            return params;
+        }
+        Map<String, String> mapExtra = msg.extra;
+        JSONObject json = new JSONObject(mapExtra);
+        params.putString("extra",json.toString());
+        if (msg.text != null){
+            if (!msg.text.isEmpty()){
+                params.putString("text",msg.text);
+            }
+        }
+
+        if (mapExtra.get("title") != null){
+            params.putString("title",mapExtra.get("title"));
+        }
+        if (mapExtra.get("content") != null) {
+            params.putString("text",mapExtra.get("content"));
+        }else if (mapExtra.get("text") != null){
+            params.putString("text",mapExtra.get("text"));
+        }
+        return params;
+    }
     public void initUpush(final Context context, final UMPUSHCallback umcallback) {
 
         //---------------
@@ -72,7 +110,7 @@ public class RNUMPush {
             public void dealWithNotificationMessage(Context context, UMessage uMessage) {
                 super.dealWithNotificationMessage(context, uMessage);
                 // 收到消息时的回调方法(不点击通知也会走),自定义消息和通知都会走这个回调,可以在这个回调方法中做一些预处理
-                umcallback.sendDDUMessageHandler(uMessage);
+                umcallback.sendDDUMessageHandler(createData(uMessage));
             }
             /**
              * 自定义消息的回调方法
@@ -82,7 +120,9 @@ public class RNUMPush {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        umcallback.sendDDUMessageHandler(msg);
+
+
+                        umcallback.sendDDUMessageHandler(createData(msg));
                         boolean isClickOrDismissed = true;
                         if (isClickOrDismissed) {
                             //自定义消息的点击统计

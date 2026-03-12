@@ -3,7 +3,10 @@ package com.kk.rnumsdk;
 import android.app.Notification;
 import android.content.Context;
 
+import com.facebook.react.bridge.WritableMap;
 import com.umeng.message.entity.UMessage;
+
+import java.util.Map;
 
 //interface UMPushInterface {
 //    public void sendDDUMessageHandler(UMessage umessage);
@@ -11,7 +14,7 @@ import com.umeng.message.entity.UMessage;
 //    public Notification getNotification(Context context, UMessage msg);
 //}
 public abstract class UMPUSHCallback {
-    public void sendDDUMessageHandler(UMessage umessage){};
+    public void sendDDUMessageHandler(WritableMap uMessage){};
     public void deviceTokenBack(String deviceToken){};
     public Notification getNotification(Context context, UMessage msg){ return null; };
 

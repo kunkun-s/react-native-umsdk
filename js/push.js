@@ -14,8 +14,23 @@ function getRNUMPush() {
  */
 export const userNotificationCenter = (callback)=>{
 
-    const listeener = new NativeEventEmitter( NativeModules?.KKUMSdkEventEmitter)?.addListener?.('userNotificationCenter', callback);
-   
+    const listeener = new NativeEventEmitter( NativeModules?.KKUMSdkEventEmitter)?.addListener?.('userNotificationCenter', (pushData)=>{
+        
+        let n_pushData = {};
+        if (Object.prototype.toString.call(pushData) == '[object Object]') {
+            n_pushData = Object.assign({}, pushData)
+        }
+        
+        if (Object.prototype.toString.call(n_pushData?.extra) == '[object String]') {
+            n_pushData['extra'] = JSON.parse(n_pushData.extra);
+        }
+        if (`${n_pushData?.extra?.hide}` == "1" || Object.keys(n_pushData)?.length === 0) {// APP内不显示弹窗
+            return;
+        }else{
+            callback(pushData)
+        }
+    });
+
     return listeener
 }
 /**
