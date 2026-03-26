@@ -32,6 +32,20 @@ public class RNUMPush {
         if (userData != null){
             deviceToken = userData.getString("deviceToken","");
         }
+        try {
+            // 2. 缓存为空，尝试从 SDK 获取
+            PushAgent pushAgent = PushAgent.getInstance(applicatioContext);
+            if (pushAgent != null) {
+                String registrationId = pushAgent.getRegistrationId();
+                if (registrationId != null && !registrationId.isEmpty()) {
+                    // 获取到 token，更新缓存
+                    deviceToken = registrationId;
+                }
+            }
+        } catch (Exception ignored) {
+
+        }
+
         if (callback != null) {
             callback.invoke(deviceToken);
         }
@@ -162,7 +176,7 @@ public class RNUMPush {
                 SharedPreferences userData = context.getSharedPreferences("userDataRN", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = userData.edit();
                 editor.putString("deviceToken",deviceToken);
-                editor.commit();
+                editor.apply();
                 umcallback.deviceTokenBack(deviceToken);
             }
 
