@@ -30,8 +30,9 @@ public class RNUmsdkImpl {
             AppResource = new KKAppResourceDefault();
         }
     }
-    private static void sendEvent(Context reactContext, String eventName, WritableMap params){
-        KKUMSdkEventEmitter.getInstance().sendEventWithName(eventName, params);
+    public static void sendEvent( WritableMap params){
+
+        KKUMSdkEventEmitter.getInstance().sendEventWithName("userNotificationCenter", params);
     }
     /**
      * 设置制定的resource，覆盖默认的com.kk.rnumsdk的resource
@@ -51,23 +52,23 @@ public class RNUmsdkImpl {
     //与初始化
     public void preInitUMSDK(String appkey, String channel){
         //友盟基础组件预初始化
-        UMConfigure.preInit(this.reactContext.getApplicationContext() ,appkey, channel);
+        UMConfigure.preInit(reactContext.getApplicationContext() ,appkey, channel);
     };
 
     //正式初始化umsdk
     public void initUMSDK(String appkey, String channel, String secret){
         //RNUmsdkModule.initUMSDK(reactContext,"551243cefd98c5ceee00031e", channel,"75e1195e4d71f6588352ea62108106dc");
         //正式初始化友盟基础组件，必须在用户隐私协议同意之后才可以。之前先试用预初始化方法
-        UMConfigure.init(this.reactContext.getApplicationContext(), appkey, channel, UMConfigure.DEVICE_TYPE_PHONE, secret);
+        UMConfigure.init(reactContext.getApplicationContext(), appkey, channel, UMConfigure.DEVICE_TYPE_PHONE, secret);
     };
 
     //获取推送token，必须要在注册后才能获取到正确token
     public void getDeviceToken(Callback callback){
-        RNUMPush.getDeviceToken(callback, this.reactContext.getApplicationContext());
+        RNUMPush.getDeviceToken(callback, reactContext.getApplicationContext());
     };
     //获取推送消息（主要是iOS需要）
     public void getNonification(Callback callback){
-
+        RNUMPush.getNonification(callback, reactContext.getApplicationContext());
     }
 
     /**

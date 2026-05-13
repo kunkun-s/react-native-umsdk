@@ -4,7 +4,7 @@ def safeExtGet(prop, fallback) {
 
 buildscript {
     repositories {
-          //国内
+         //国内
         maven { url 'https://maven.aliyun.com/repository/central' }
         maven { url 'https://maven.aliyun.com/repository/google' }
         maven { url 'https://maven.aliyun.com/repository/public' }
@@ -16,12 +16,11 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:8.6.0'
     }
-    
 }
 
 allprojects {
     repositories {
-          //国内
+         //国内
         maven { url 'https://maven.aliyun.com/repository/central' }
         maven { url 'https://maven.aliyun.com/repository/google' }
         maven { url 'https://maven.aliyun.com/repository/public' }
@@ -50,7 +49,7 @@ android {
         versionName "${version}"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
     }
-     sourceSets {
+    sourceSets {
         main {
             if (isNewArchitectureEnabled()) {
                 java.srcDirs += ['src/newarch']
@@ -75,19 +74,19 @@ dependencies {
 //    api 'com.tencent.tauth:qqopensdk:3.53.0'//QQ官方依赖库，必选 jcenter()
     implementation 'com.squareup.okhttp3:okhttp:3.12.12'//QQ SDK在3.53.0版本及以上时需要集成okhttp官方依赖库，必选
     api 'com.tencent.mm.opensdk:wechat-sdk-android:6.8.24'//微信官方依赖
-    api 'com.umeng.umsdk:common:9.8.0'  // 必选
-    api 'com.umeng.umsdk:asms:1.8.6'    // 必选
-    api 'com.umeng.umsdk:share-core:7.3.3' //友盟分享
-    api 'com.umeng.umsdk:share-wx:7.3.3' //友盟分享微信
-    api 'com.umeng.umsdk:share-qq:7.3.3' // qq
+    api 'com.umeng.umsdk:common:9.8.8'  // 必选
+    api 'com.umeng.umsdk:asms:1.8.7.2'    // 必选
+    api 'com.umeng.umsdk:share-core:7.3.7' //友盟分享
+    api 'com.umeng.umsdk:share-wx:7.3.7' //友盟分享微信
+    api 'com.umeng.umsdk:share-qq:7.3.7' // qq
     //友盟Push依赖
-    api 'com.umeng.umsdk:push:6.7.4'
+    api 'com.umeng.umsdk:push:6.7.6'
     // 解决utdid 与alipay冲突
-    // api('com.umeng.umsdk:push:6.4.5') {
+    // api('com.umeng.umsdk:push:6.7.6') {
     //     exclude group: 'com.umeng.umsdk', module: 'utdid'
     // }
 
-    implementation 'com.umeng.umsdk:apm:1.5.2' // 错误分析升级为独立SDK，看crash数据请一定集成，可选
+    implementation 'com.umeng.umsdk:apm:2.0.8' // 错误分析升级为独立SDK，看crash数据请一定集成，可选
 //    implementation  'com.umeng.umsdk:abtest:1.0.0'//使用U-App中ABTest能力，可选
 
     implementation 'com.facebook.react:react-native:+'

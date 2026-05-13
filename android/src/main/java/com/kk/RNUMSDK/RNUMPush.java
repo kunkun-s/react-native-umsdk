@@ -2,6 +2,7 @@ package com.kk.rnumsdk;
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,6 +25,49 @@ import java.util.Map;
 
 public class RNUMPush {
     private Handler handler;
+
+    /**
+     * 需要再MainActivity的onCreate方法中调用该方法
+     * app通过投送通知进入前台时，获取通知的消息内容并缓存，等RN层调用getNonification方法时返回给RN层，之后清空缓存
+     */
+    public static void savePushIntent(Intent intent, Context applicatioContext) {
+        if (intent == null) return;
+
+        // 你原来的字段
+        String msg = intent.getStringExtra("msg");
+
+        if (msg == null || msg.isEmpty()) return;
+
+        try {
+            JSONObject msgJson = new JSONObject(msg);
+            String extra = msgJson.optString("extra", "");
+            String title = "";
+            String text = "";
+
+            if (!extra.isEmpty()) {
+                JSONObject extraJson = new JSONObject(extra);
+                title = extraJson.optString("title", "");
+                String content = extraJson.optString("content", "");
+                if(!content.isEmpty()){
+                    text = content;
+                }else {
+                    text = extraJson.optString("text", "");
+                }
+
+            }
+            // 存入 SP
+            SharedPreferences sp = applicatioContext.getSharedPreferences("PushCache", Context.MODE_PRIVATE);
+            sp.edit()
+                    .putString("msg", msg)
+                    .putString("extra", extra)
+                    .putString("title", title)
+                    .putString("text", text)
+                    .apply();
+
+        } catch (Exception e) {
+            // 不崩溃
+        }
+    }
     //原旧RNUMPush模块方法
     public static void getDeviceToken(Callback callback, Context applicatioContext){
 
@@ -50,9 +94,29 @@ public class RNUMPush {
             callback.invoke(deviceToken);
         }
     };
-    //与iOS保持一致方法，android没有实际方法
+    /**
+     * 需要再MainActivity的onCreate方法中调用savePushIntent
+     */
     public static void getNonification(Callback callback, Context applicatioContext){
+        if(applicatioContext == null) {
+            return;
+        }
+        SharedPreferences sp = applicatioContext.getSharedPreferences("PushCache", Context.MODE_PRIVATE);
+        String extra = sp.getString("extra", "");
+        String title = sp.getString("title", "");
+        String text = sp.getString("text", "");
 
+        WritableMap params = Arguments.createMap();
+        params.putString("custom", "");
+        params.putString("extra", extra);
+        params.putString("title", title);
+        params.putString("text", text);
+
+        if (callback != null){
+            callback.invoke(params);
+        }
+        // 读完清空
+        sp.edit().clear().apply();
     };
     public static WritableMap createData(UMessage msg){
         WritableMap params = Arguments.createMap();
@@ -124,6 +188,7 @@ public class RNUMPush {
             public void dealWithNotificationMessage(Context context, UMessage uMessage) {
                 super.dealWithNotificationMessage(context, uMessage);
                 // 收到消息时的回调方法(不点击通知也会走),自定义消息和通知都会走这个回调,可以在这个回调方法中做一些预处理
+                RNUmsdkImpl.sendEvent(createData(uMessage));
                 umcallback.sendDDUMessageHandler(createData(uMessage));
             }
             /**
@@ -135,7 +200,7 @@ public class RNUMPush {
                     @Override
                     public void run() {
 
-
+                        RNUmsdkImpl.sendEvent(createData(msg));
                         umcallback.sendDDUMessageHandler(createData(msg));
                         boolean isClickOrDismissed = true;
                         if (isClickOrDismissed) {
