@@ -43,7 +43,7 @@ Pod::Spec.new do |s|
   s.dependency "UMAPM",'~> 1.5.3'
   s.dependency 'UMPush','~> 4.1.3'
   s.dependency "UMCommon",'~> 7.5.6'
-  s.dependency 'UMDevice','~> 3.4.0'
+  s.dependency 'UMDevice'
   #s.dependency "others"
   s.dependency 'WechatOpenSDK',"~> 2.0.5"
 

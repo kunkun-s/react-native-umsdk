@@ -25,8 +25,8 @@ RCT_REMAP_METHOD(getDeviceToken, getDeviceToken:(RCTResponseSenderBlock)callback
 RCT_REMAP_METHOD(getNonification, getNonification:(RCTResponseSenderBlock)callback){
     [[RNUMSdkImpl sharedInstanceDelegate] getNonification:callback];
 }
-RCT_REMAP_METHOD(shareToPlatform, shareToPlatform:(NSString *)platformType shareType:(NSString *)shareType params:(NSDictionary *)params callback:(RCTResponseSenderBlock)callback){
-    [[RNUMSdkImpl sharedInstanceDelegate] shareToPlatform:platformType shareType:shareType params:params callback:callback];
+RCT_REMAP_METHOD(shareToPlatform, shareToPlatform:(NSString *)platformType shareType:(NSString *)shareType params:(NSDictionary *)params){
+    [[RNUMSdkImpl sharedInstanceDelegate] shareToPlatform:platformType shareType:shareType params:params];
 }
 RCT_REMAP_METHOD(isInstall, isInstall:(NSString *)platformType callback:(RCTResponseSenderBlock)callback){
     [[RNUMSdkImpl sharedInstanceDelegate] isInstall:platformType callback:callback];

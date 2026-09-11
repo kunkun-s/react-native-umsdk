@@ -122,64 +122,49 @@
  content
  }
  */
-+(void)shareToPlatform:(NSInteger )platformType shareType:(NSString *)shareType params:(NSDictionary *)params completion:(RCTResponseSenderBlock)completion{
-    __block RCTResponseSenderBlock _completion = completion;
-    void (^callBack)(BOOL success)  = ^(BOOL success){
-        if (success) {
-          _completion(@[@200, @"share success"]);
-          _completion = nil;
-        }else{
-          _completion(@[@-1, @"share failed"]);
-          _completion = nil;
-        }
-      };
++(void)shareToPlatform:(NSInteger )platformType shareType:(NSString *)shareType params:(NSDictionary *)params{
     if (platformType == 1 || platformType == 2) {
        //友盟6.10.13调用微信有问题，改为直接调用微信api
-       [DDWXShare share:platformType shareType:shareType params:params completion:callBack];
+       [DDWXShare share:platformType shareType:shareType params:params completion:^(BOOL success){
+           if (!success) {
+               NSLog(@"[RNUMShare] 调起微信失败 platformType=%ld", (long)platformType);
+           }
+       }];
     } else {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             UMSocialMessageObject *messageObject = [UMSocialMessageObject messageObject];
             messageObject.text = @"点到分享";
             if([shareType isEqualToString: @"MiniProgram"]){
               messageObject.shareObject = [RNUMShare shareMiniProgramObject:params];
-              
+
             }else if([shareType isEqualToString: @"Image"]){
               messageObject.shareObject = [RNUMShare shareImageObject:params];
-              
+
             }else{
               //否则默认是Webpage 网页分享
               messageObject.shareObject = [RNUMShare shareWebObject:params];
-              
+
             }
             dispatch_async(dispatch_get_main_queue(), ^{
-                //调用分享接口
+                //调用分享接口（不返回回调，失败只打日志）
                 [[UMSocialManager defaultManager] shareToPlatform:[RNUMShare platformType:platformType] messageObject:messageObject currentViewController:nil completion:^(id data, NSError *error) {
-
-                  if (callBack) {
                     if (error) {
-                      NSString *msg = error.userInfo[@"NSLocalizedFailureReason"];
-                      if (!msg) {
-                        msg = error.userInfo[@"message"];
-                      }if (!msg) {
-                        msg = @"share failed";
-                      }
-                      NSInteger stcode =error.code;
-                      if(stcode == 2009){
-                        stcode = -1;
-                      }
-                        completion(@[@(stcode), msg]);
-                    } else {
-                        completion(@[@200, @"share success"]);
-                      
+                        NSString *msg = error.userInfo[@"NSLocalizedFailureReason"];
+                        if (!msg) {
+                            msg = error.userInfo[@"message"];
+                        }
+                        if (!msg) {
+                            msg = @"share failed";
+                        }
+                        NSLog(@"[RNUMShare] 分享失败 platformType=%ld code=%ld msg=%@", (long)platformType, (long)error.code, msg);
                     }
-                  }
                 }];
             });
-            
+
         });
 
     }
-  
+
 
 }
 +(BOOL)isInstall:(NSString *)platform{

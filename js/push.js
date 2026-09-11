@@ -15,19 +15,24 @@ function getRNUMPush() {
 export const userNotificationCenter = (callback)=>{
 
     const listeener = new NativeEventEmitter( NativeModules?.KKUMSdkEventEmitter)?.addListener?.('userNotificationCenter', (pushData)=>{
-        
+
         let n_pushData = {};
         if (Object.prototype.toString.call(pushData) == '[object Object]') {
             n_pushData = Object.assign({}, pushData)
         }
-        
-        if (Object.prototype.toString.call(n_pushData?.extra) == '[object String]') {
-            n_pushData['extra'] = JSON.parse(n_pushData.extra);
+
+        //原生两端下发的 extra 都是 JSON 字符串，这里统一解析成对象再回调
+        if (Object.prototype.toString.call(n_pushData?.extra) == '[object String]' && n_pushData.extra.length > 0) {
+            try {
+                n_pushData['extra'] = JSON.parse(n_pushData.extra);
+            } catch (e) {
+                n_pushData['extra'] = {};
+            }
         }
         if (`${n_pushData?.extra?.hide}` == "1" || Object.keys(n_pushData)?.length === 0) {// APP内不显示弹窗
             return;
         }else{
-            callback(pushData)
+            callback(n_pushData)
         }
     });
 

@@ -15,9 +15,23 @@ RCT_EXPORT_MODULE(RNUMSdkBridge)
 }
 #endif
 
+/**
+ 不声明 methodQueue 时，TurboModule 的方法会跑在 RCTTurboModuleManager 的
+ 共享后台串行队列上（所有未声明队列的模块共用）。友盟的初始化、分享、授权都要求主线程，
+ 这里显式回到主队列，与旧架构实现保持一致。
+ */
+- (dispatch_queue_t)methodQueue
+{
+    return dispatch_get_main_queue();
+}
+
++ (BOOL)requiresMainQueueSetup
+{
+    return YES;
+}
 
 - (void)preInitUMSDK:(NSString *)appkey channel:(NSString *)channel{
-    
+
 };
 - (void)initUMSDK:(NSString *)appkey channel:(NSString *)channel secret:(NSString *)secret{
     [[RNUMSdkImpl sharedInstanceDelegate] initUMSDK:appkey channel:channel secret:secret];
@@ -31,8 +45,8 @@ RCT_EXPORT_MODULE(RNUMSdkBridge)
 - (void)auth:(NSString *)platformType callback:(RCTResponseSenderBlock)callback{
     [[RNUMSdkImpl sharedInstanceDelegate] auth:platformType callback:callback];
 };
-- (void)shareToPlatform:(NSString *)platformType shareType:(NSString *)shareType params:(NSDictionary *)params callback:(RCTResponseSenderBlock)callback{
-    [[RNUMSdkImpl sharedInstanceDelegate] shareToPlatform:platformType shareType:shareType params:params callback:callback];
+- (void)shareToPlatform:(NSString *)platformType shareType:(NSString *)shareType params:(NSDictionary *)params{
+    [[RNUMSdkImpl sharedInstanceDelegate] shareToPlatform:platformType shareType:shareType params:params];
 };
 - (void)isInstall:(NSString *)platformType callback:(RCTResponseSenderBlock)callback{
     [[RNUMSdkImpl sharedInstanceDelegate] isInstall:platformType callback:callback];

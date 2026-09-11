@@ -23,7 +23,7 @@
 + (UMSocialPlatformType)platformType:(NSInteger)platform;
 
 +(void)configUSharePlatforms:(RNUMShareModel *)params;
-+(void)shareToPlatform:(NSInteger )platformType shareType:(NSString *)shareType params:(NSDictionary *)params completion:(RCTResponseSenderBlock)callBack;
++(void)shareToPlatform:(NSInteger )platformType shareType:(NSString *)shareType params:(NSDictionary *)params;
 +(BOOL)isInstall:(NSString *)platform;
 +(void)auth:(NSInteger)platform completion:(RCTResponseSenderBlock)completion;
 @end

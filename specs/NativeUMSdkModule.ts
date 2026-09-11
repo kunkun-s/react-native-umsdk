@@ -24,8 +24,8 @@ export interface Spec extends TurboModule {
     
     //三方登录
     auth(platformType:string, callback:(code:number,result:string,message:string)=>void):void;
-    //分享
-    shareToPlatform(platformType:string, shareType:string, params:Object, callback?:(code:number|string, message:string)=>void):void;
+    //分享（不需要回调，分享结果不返回JS）
+    shareToPlatform(platformType:string, shareType:string, params:Object):void;
     //检测是否安装
     isInstall(platformType:string, callback:(status:boolean)=>void):void;
     

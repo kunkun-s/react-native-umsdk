@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)getDeviceToken:(RCTResponseSenderBlock)callback;
 - (void)getNonification:(RCTResponseSenderBlock)callback;
 - (void)auth:(NSString *)platformType callback:(RCTResponseSenderBlock)callback;
-- (void)shareToPlatform:(NSString *)platformType shareType:(NSString *)shareType params:(NSDictionary *)params callback:(RCTResponseSenderBlock)callback;
+- (void)shareToPlatform:(NSString *)platformType shareType:(NSString *)shareType params:(NSDictionary *)params;
 - (void)isInstall:(NSString *)platformType callback:(RCTResponseSenderBlock)callback;
 - (void)onPageStart:(NSString *)pageName;
 - (void)onPageEnd:(NSString *)pageName;

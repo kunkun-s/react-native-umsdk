@@ -159,8 +159,9 @@ public class RNUMPush {
 
         //sdk开启通知声音
         mPushAgent.setNotificationPlaySound(MsgConstant.NOTIFICATION_PLAY_SDK_ENABLE);
-        //获取的是主程序的包名而非是，当前模块的包名
-        String applictionID = context.getApplicationInfo().packageName;
+        //取到的是主程序的包名(applicationId)，不是当前模块的包名：库的res会被merge进宿主apk，
+        //运行时那些资源就挂在主程序包名下，所以这里只能传主程序包名。等价于 context.getPackageName()
+        String applictionID = context.getPackageName();
 //        Log.i("xxxxxx",applictionID);
         //为push 指定packageName，如果文件结构和包名不一致时必须设置，用于加载那个资源包的res下文件，可以是gradle依赖的三方包
         mPushAgent.setResourcePackageName(applictionID);
@@ -188,8 +189,11 @@ public class RNUMPush {
             public void dealWithNotificationMessage(Context context, UMessage uMessage) {
                 super.dealWithNotificationMessage(context, uMessage);
                 // 收到消息时的回调方法(不点击通知也会走),自定义消息和通知都会走这个回调,可以在这个回调方法中做一些预处理
-                RNUmsdkImpl.sendEvent(createData(uMessage));
-                umcallback.sendDDUMessageHandler(createData(uMessage));
+                WritableMap data = createData(uMessage);
+                RNUmsdkImpl.sendEvent(data);
+                if (umcallback != null) {
+                    umcallback.sendDDUMessageHandler(data);
+                }
             }
             /**
              * 自定义消息的回调方法
@@ -200,8 +204,11 @@ public class RNUMPush {
                     @Override
                     public void run() {
 
-                        RNUmsdkImpl.sendEvent(createData(msg));
-                        umcallback.sendDDUMessageHandler(createData(msg));
+                        WritableMap data = createData(msg);
+                        RNUmsdkImpl.sendEvent(data);
+                        if (umcallback != null) {
+                            umcallback.sendDDUMessageHandler(data);
+                        }
                         boolean isClickOrDismissed = true;
                         if (isClickOrDismissed) {
                             //自定义消息的点击统计

@@ -6,8 +6,6 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 
-import javax.annotation.Nullable;
-
 public class RNUmsdk extends ReactContextBaseJavaModule {
     public RNUmsdkImpl sdkImpl = null;
     public static ReactApplicationContext reactContext;
@@ -53,8 +51,8 @@ public class RNUmsdk extends ReactContextBaseJavaModule {
         sdkImpl.auth(reactContext.getCurrentActivity(), platformType, callback);
     };
     @ReactMethod
-    public void shareToPlatform(String platformType, String shareType, ReadableMap params, @Nullable Callback callback){
-        sdkImpl.shareToPlatform(reactContext.getCurrentActivity(), platformType, shareType, params, callback);
+    public void shareToPlatform(String platformType, String shareType, ReadableMap params){
+        sdkImpl.shareToPlatform(reactContext.getCurrentActivity(), platformType, shareType, params);
     };
     @ReactMethod
     public void isInstall(String platformType, Callback callback){

@@ -166,12 +166,12 @@
 419a441,442
 > ./SocialLibraries/QQ/QQSDK/TencentOpenAPI.framework/Headers/Modules
 > ./SocialLibraries/QQ/QQSDK/TencentOpenAPI.framework/Headers/Modules/module.modulemap
-421a445
-> ./SocialLibraries/QQ/QQSDK/TencentOpenAPI.framework/Headers/SDKDef.h
-423,424c447
-< ./SocialLibraries/QQ/QQSDK/TencentOpenAPI.framework/Headers/sdkdef.h
+422d444
+< ./SocialLibraries/QQ/QQSDK/TencentOpenAPI.framework/Headers/TencentOAuth.h
+424c446,447
 < ./SocialLibraries/QQ/QQSDK/TencentOpenAPI.framework/Resources
 ---
+> ./SocialLibraries/QQ/QQSDK/TencentOpenAPI.framework/Headers/TencentOAuth.h
 > ./SocialLibraries/QQ/QQSDK/TencentOpenAPI.framework/Headers/TencentOpenApiUmbrellaHeader.h
 427,433d449
 < ./SocialLibraries/QQ/libSocialQQ.a

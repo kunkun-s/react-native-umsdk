@@ -37,16 +37,17 @@ static RNUMSdkImpl *sharedInstance = nil;
 };
 - (void)getNonification:(RCTResponseSenderBlock)callback{
     NSDictionary * params = [RNUMPush getNonification];
-    if (params&& params.count >0 ) {
-        callback(@[params]);//返回应用在后台时接受的暂存消息
+    //没有暂存消息时也回调空字典，保证JS端一定收到结果，不会一直等
+    if (callback) {
+        callback(@[params ?: @{}]);//返回应用在后台时接受的暂存消息
     }
 };
 - (void)auth:(NSString *)platformType callback:(RCTResponseSenderBlock)callback{
-    
+
     [RNUMShare auth:[platformType integerValue] completion:callback];
 };
-- (void)shareToPlatform:(NSString *)platformType shareType:(NSString *)shareType params:(NSDictionary *)params callback:(RCTResponseSenderBlock)callback{
-    [RNUMShare shareToPlatform:[platformType integerValue] shareType:shareType params:params completion:callback];
+- (void)shareToPlatform:(NSString *)platformType shareType:(NSString *)shareType params:(NSDictionary *)params{
+    [RNUMShare shareToPlatform:[platformType integerValue] shareType:shareType params:params];
 };
 - (void)isInstall:(NSString *)platformType callback:(RCTResponseSenderBlock)callback{
     BOOL isInstall = [RNUMShare isInstall:platformType];

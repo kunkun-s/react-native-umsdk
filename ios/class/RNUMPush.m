@@ -110,14 +110,18 @@ static RNUMPush * push = nil;
     //应用处于后台时的远程推送接受
     //必须加这句代码
     [UMessage didReceiveRemoteNotification:userInfo];
-    //将通知消息暂存
+    //将通知消息暂存（APP被杀，启动后JS未加载完成时，由JS调用getNonification取走）
     [[NSUserDefaults standardUserDefaults] setObject:userInfo forKey:@"RN_UM_NONIFICATION_BACK"];
     [[NSUserDefaults standardUserDefaults] synchronize];
-      
+
     [RNUMPush sendEventWithName:NONIFICATION_TYPE body:userInfo];
-    
+
   }else{
     //应用处于后台时的本地推送接受
+  }
+  //必须调用，否则系统会认为该次点击未被处理（后台唤起时可能被回收）
+  if (completionHandler) {
+    completionHandler();
   }
 }
 //UNUserNotificationCenter deleage

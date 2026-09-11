@@ -1,23 +1,13 @@
 package com.kk.rnumsdk;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
-
-import androidx.core.content.ContextCompat;
-
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.tencent.tauth.Tencent;
@@ -25,7 +15,6 @@ import com.umeng.socialize.PlatformConfig;
 import com.umeng.socialize.ShareAction;
 import com.umeng.socialize.UMAuthListener;
 import com.umeng.socialize.UMShareAPI;
-import com.umeng.socialize.UMShareListener;
 import com.umeng.socialize.bean.SHARE_MEDIA;
 import com.umeng.socialize.common.ResContainer;
 import com.umeng.socialize.media.UMImage;
@@ -36,11 +25,10 @@ import java.io.File;
 import java.util.Map;
 
 public class RNUMShare {
-    public static Context reactContext;
     private static Handler mSDKHandler = null;
 
-    public RNUMShare(Context nReactContext, KKAppResource AppResource) {
-        reactContext = nReactContext;
+    //发起分享/授权时都是通过参数传入当前Activity，这里不再持有Context，避免静态引用造成泄漏
+    public RNUMShare() {
     }
 
     private static void runOnMainThread(Runnable runnable) {
@@ -229,13 +217,13 @@ public class RNUMShare {
 
 
     /**
-     * 调起无UI 分享
-     * @param platformType
-     * @param shareType
-     * @param params
-     * @param successCallback
+     * 调起无UI 分享（不返回回调）
+     * @param ma 发起分享的activity
+     * @param platformType 1微信聊天 2微信朋友圈 4qq
+     * @param shareType Image / MiniProgram / 其它(网页)
+     * @param params 分享参数
      */
-    public void shareToPlatform(Activity ma, final Integer platformType, final String shareType, final ReadableMap params, final Callback successCallback){
+    public void shareToPlatform(Activity ma, final Integer platformType, final String shareType, final ReadableMap params){
         if (ma == null){
             return;
         }
@@ -245,12 +233,9 @@ public class RNUMShare {
                 try {
                     ReadableMap newParams = (ReadableMap)params;
                    SHARE_MEDIA share_media = platformType(platformType);
-                   
+
                     if ( share_media != null && params != null ){
                         if (shareType.equals("MiniProgram")){
-//                                if (successCallback != null){
-//                                    successCallback.invoke(101,"WX");
-//                                }
                             shareWXMiniProgram(newParams,share_media,ma);
 
                         } else if ( shareType.equals("Image") ) {
@@ -258,14 +243,13 @@ public class RNUMShare {
 
 
                         } else {
-//                                if (successCallback != null){
-//                                    successCallback.invoke(101,"QQ");
-//                                }
                             shareWeb(newParams,share_media,ma);
 
                         }
                     }
                 }catch (Exception e){
+                    //分享不返回回调，失败只能在这里留痕
+                    Log.e("RNUMShare", "shareToPlatform failed, platformType=" + platformType + " shareType=" + shareType, e);
                 }
 
             }
@@ -299,9 +283,10 @@ public class RNUMShare {
                         WritableMap result = Arguments.createMap();
                         for (String key:map.keySet()){
                             result.putString(key,map.get(key));
-                            Log.e("todoremove","key="+key+"   value"+map.get(key).toString());
                         }
-                        successCallback.invoke(200,result,"success");
+                        if (successCallback != null) {
+                            successCallback.invoke(200,result,"success");
+                        }
                     }
 
                     @Override
@@ -321,21 +306,25 @@ public class RNUMShare {
 
     }
 
+    /**
+     * 是否安装目标APP
+     * @param platform "QQ" / "WX_LINE"(朋友圈) / "WX_SESSION"(聊天)
+     */
     public void isInstall(Activity ma, String platform, Callback callback){
         SHARE_MEDIA share_media = null;
         boolean isInstall = false;
-        if ( platform.equals("QQ") ){
+        if ( "QQ".equals(platform) ){
             Tencent.setIsPermissionGranted(true);
             share_media = SHARE_MEDIA.QQ;
 
-        }else if ( platform.equals("WX_LINE") ){
+        }else if ( "WX_LINE".equals(platform) ){
             share_media = SHARE_MEDIA.WEIXIN_CIRCLE;
 
-        }else if ( platform.equals("WX_SESSION") ){
+        }else if ( "WX_SESSION".equals(platform) ){
             share_media = SHARE_MEDIA.WEIXIN;
 
         }
-        if (share_media != null ){
+        if (share_media != null && ma != null ){
             try {
 
                 isInstall =  UMShareAPI.get(ma).isInstall(ma,share_media);
