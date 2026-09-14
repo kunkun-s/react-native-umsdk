@@ -1,7 +1,7 @@
 
 {
   "name": "react-native-umsdk",
-  "version": "1.0.8",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -21,9 +21,11 @@
   "author": "",
   "license": "",
   "homepage": "https://github.com/kunkun-s/react-native-umsdk.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kunkun-s/react-native-umsdk.git"
+  },
   "peerDependencies": {
-    "react-native": "^0.41.2",
-    "react-native-windows": "0.41.0-rc.1"
-
+    "react-native": ">=0.71.0"
   }
 }
