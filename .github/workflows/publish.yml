@@ -1,0 +1,59 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+  # 手动补发用：改了 workflow 或发布中途失败时，不用删 tag 重打
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # OIDC 必需。少了这一行 GitHub 不会签发 id-token，
+      # npm 拿不到临时凭证，最后会报一个看起来毫无关系的 404。
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ⚠️ 这里故意【不】写 registry-url。
+      # actions/setup-node 一旦收到 registry-url，就会往 ~/.npmrc 写一行
+      #   //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+      # 值为空。npm 读到这个 key 就认为已经配好了 token，于是跳过 OIDC 流程，
+      # 结果是 ENEEDAUTH，或者一个伪装成"包不存在"的 404。
+      - uses: actions/setup-node@v4
+        with:
+          # Node 24 自带 npm 11.12，满足 trusted publishing 要求的 >= 11.5.1。
+          # Node 22 自带的是 npm 10.x，不支持 OIDC。
+          node-version: '24'
+
+      - name: 校验 npm 版本支持 trusted publishing
+        run: |
+          node -e '
+            const v = require("child_process").execSync("npm --version").toString().trim();
+            console.log("npm version:", v);
+            const [maj, min] = v.split(".").map(Number);
+            if (maj < 11 || (maj === 11 && min < 5)) {
+              console.error("::error::trusted publishing 需要 npm >= 11.5.1，当前为 " + v);
+              process.exit(1);
+            }
+          '
+
+      - name: 校验 tag 与 package.json 版本一致
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "package.json = $PKG"
+          echo "git tag      = $TAG"
+          [ "$PKG" = "$TAG" ] || {
+            echo "::error::package.json 版本号与 tag 不一致，先改 package.json 再打 tag"; exit 1;
+          }
+
+      # 不需要任何 NPM_TOKEN / NODE_AUTH_TOKEN。
+      # npm 会向 GitHub 换取 OIDC 令牌，再用它向 registry 换取一次性的发布凭证。
+      # 凭证用完即废，所以没有 90 天轮换、也就没有可泄露的长期密钥。
+      - run: npm publish
