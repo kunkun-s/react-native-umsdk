@@ -11,4 +11,6 @@
 
 + (void)share:(NSInteger )platformType shareType:(NSString *_Nullable)shareType params:(NSDictionary *_Nullable)params completion:(void (^ __nullable)(BOOL success))completion;
 + (UIImage *_Nullable)compressImageSize:(UIImage * _Nullable )image toByte:(NSUInteger)maxLength;
+/**小程序类型 0正式(默认) 1开发 2体验，非法值按正式处理*/
++ (NSInteger)miniProgramType:(NSDictionary *_Nullable)params;
 @end

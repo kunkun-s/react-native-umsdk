@@ -544,6 +544,7 @@ Share.shareToPlatform(1, 'MiniProgram', {
     img_path: 'https://cdn.example.com/thumb.jpg',
     path:     'pages/index/index',          // 小程序页面路径
     userName: 'gh_xxxxxxxxxxxx',            // 小程序原始 id
+    miniProgramType: '0',                   // 可选：'0' 正式（默认）· '1' 开发 · '2' 体验
 });
 ```
 
@@ -565,8 +566,11 @@ Share.shareToPlatform(1, 'MiniProgram', {
 | `poster` | **纯图片分享**的图片地址（`shareType = 'Image'` 时使用） |
 | `path` | 小程序页面路径（`shareType = 'MiniProgram'` 时使用） |
 | `userName` | 小程序原始 id（`shareType = 'MiniProgram'` 时使用） |
+| `miniProgramType` | 小程序版本（`shareType = 'MiniProgram'` 时使用）：`'0'` 正式（默认）· `'1'` 开发 · `'2'` 体验，传数字 `0/1/2` 也兼容；非法值按正式处理 |
 
 > **图片路径注意**：分享图片如果用的是自家 CDN，且遇到 SSL 证书问题，可以像示例一样把 `https` 换成 `http`，友盟 SDK 对部分 CDN 证书兼容性较差。
+>
+> **小程序版本实现说明**：微信侧友盟 `UMMin` 不支持指定小程序版本。Android 上正式版仍走友盟原链路，指定 `'1'` 开发 / `'2'` 体验时改为直接调用微信 SDK（appid 取自 `PlatformConfig` 中已配置的微信 appid）；iOS 走已有的 `DDWXShare` / `UMShareMiniProgramObject`。分享到 QQ 时没有版本概念，参数会被忽略。
 
 ---
 

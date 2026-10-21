@@ -88,7 +88,7 @@
         NSBundle *bundle = [NSBundle bundleWithURL:bundleURL];
         shareObject.hdImageData = [NSData dataWithContentsOfFile:[bundle pathForResource:@"defaultShare" ofType:@"jpg"]];
     }
-  shareObject.miniProgramType = UShareWXMiniProgramTypeRelease;
+  shareObject.miniProgramType = (UShareWXMiniProgramType)[DDWXShare miniProgramType:dic];
   
   return shareObject;
      

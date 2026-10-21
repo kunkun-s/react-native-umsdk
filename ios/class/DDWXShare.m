@@ -21,7 +21,7 @@
       object.path = [params objectForKey:@"path"];
       object.hdImageData = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"defaultShare" ofType:@"jpg"]];
       object.withShareTicket = true;
-      object.miniProgramType = WXMiniProgramTypeRelease;
+      object.miniProgramType = (WXMiniProgramType)[DDWXShare miniProgramType:params];
       message.title = [params objectForKey:@"title"];
       message.description = [params objectForKey:@"content"] ;
       message.thumbData =  UIImageJPEGRepresentation([DDWXShare compressImageSize:[UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[params objectForKey:@"img_path"]]]] toByte:limitByte], 1);
@@ -52,6 +52,21 @@
     });
   });
   
+}
+/*!
+ *  @brief 小程序类型，来自JS参数 miniProgramType："0"正式(默认) "1"开发 "2"体验
+ */
++ (NSInteger)miniProgramType:(NSDictionary *_Nullable)params{
+  id value = [params objectForKey:@"miniProgramType"];
+  NSInteger type = 0;
+  //兼容JS传字符串"1"或数字1
+  if ([value respondsToSelector:@selector(integerValue)]) {
+    type = [value integerValue];
+  }
+  if (type < 0 || type > 2) {
+    type = 0;
+  }
+  return type;
 }
 /*!
  *  @brief 使图片压缩后刚好小于指定大小
